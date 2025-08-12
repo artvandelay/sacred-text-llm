@@ -1,6 +1,21 @@
 # Sacred Texts LLM Interface
+> *An AI-powered gateway to 29+ million words of spiritual wisdom*
 
-**Goal**: Build an AI interface to query wisdom from sacred texts.
+**🎯 Goal**: Query and converse with sacred texts from world religions and spiritual traditions using advanced RAG (Retrieval-Augmented Generation).
+
+## 📊 **Scale & Coverage**
+- **📚 29+ million words** across 353 sacred texts
+- **🌍 40+ spiritual traditions** - Buddhism, Christianity, Islam, Hinduism, Judaism, Taoism, Indigenous wisdom, Mystical texts
+- **📄 ~117,000 pages** of searchable spiritual knowledge
+- **📖 Equivalent to 367 books** - a complete digital spiritual library
+- **🔍 175K+ semantic chunks** optimized for AI retrieval
+
+## ✨ **What Makes This Special**
+- **🧠 Semantic Search**: Find wisdom by meaning, not just keywords
+- **🤖 Modular AI**: Switch between local models (Ollama) and cloud APIs (GPT-4, Claude)
+- **🔒 Privacy-First**: Keep sacred texts local, choose your AI provider
+- **📱 Multiple Interfaces**: Chat UI, command line, or integrate via API
+- **⚡ Fast & Accurate**: Optimized chunking and retrieval for spiritual content
 
 **Status**: Phase 1 complete ✅ | Phase 2 in progress 🚧 | Chat interface ready ✅
 
