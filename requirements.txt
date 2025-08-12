@@ -1,0 +1,4 @@
+# Sacred Texts LLM Interface Dependencies
+
+# Phase 1: Data Collection (current)
+# No external dependencies required - uses Python standard library only
