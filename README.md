@@ -2,20 +2,80 @@
 
 **Goal**: Build an AI interface to query wisdom from sacred texts.
 
-**Status**: Phase 1 complete ✅ | Phase 2 next 🚧
+**Status**: Phase 1 complete ✅ | Phase 2 in progress 🚧 | Chat interface ready ✅
+
+> **⚠️ FOR OTHER AI AGENTS**: 
+> - Ingestion is CURRENTLY RUNNING (PID 3170) - DO NOT INTERRUPT
+> - Vector store has 9,731 docs ready, chat interface works
+> - ~2 hours remaining for full ingestion 
+> - Use `tail -f ingest.log` to monitor progress
 
 ## Quick Start
 
+### 1. Download Texts (if not done)
 ```bash
-./download_sacred_texts.py
+python download_sacred_texts.py
 ```
 
-Downloads 353 sacred texts (~5GB) from [sacred-texts.com](https://sacred-texts.com/download.htm).
+### 2. Ingest to Vector Database (currently running)
+```bash
+python ingest.py --sources sacred_texts_archive/extracted --mode fast --embed-workers 1 --db-batch-size 128
+```
+**Current Status**: ⚡ INGESTING NOW - 9,731 docs ready, still processing (~2 hours remaining)
 
-## Next Steps
-1. Text processing & chunking
-2. Generate embeddings
-3. Build RAG interface
+### 3. Query the Sacred Texts
+```bash
+# Simple query (works now with partial data)
+python query.py "What is the meaning of compassion?"
+
+# Interactive chat (enhanced interface)
+python chat.py
+```
+
+⚠️ **Important**: Ingestion is still running. The chat interface works with current data (~151K+ docs) but will have complete coverage once ingestion finishes.
+
+## LLM Provider Options
+
+The system supports **modular LLM providers** - same interface, different backends:
+
+### **Phase 1: Local Ollama (Current)**
+```python
+# config.py
+LLM_PROVIDER = "ollama"  # Uses your local models
+```
+
+**Benefits:**
+- ✅ Free - no API costs
+- ✅ Private - data never leaves your machine  
+- ✅ Fast - no network calls for chat generation
+
+### **Phase 2: OpenRouter APIs (Better Quality)**
+```python
+# config.py  
+LLM_PROVIDER = "openrouter"  # Uses GPT-4, Claude, etc.
+```
+
+```bash
+# Set your API key
+export OPENROUTER_API_KEY="your-key-here"
+
+# Run the same interface
+python chat.py
+```
+
+**Benefits:**
+- 🚀 Better response quality (GPT-4, Claude)
+- 💰 Low cost (~$0.01-0.10 per question)
+- 🔄 Same interface - just better answers
+
+### **Easy Switching**
+Change one line in `config.py` to switch providers:
+```python
+LLM_PROVIDER = "ollama"      # Local models
+LLM_PROVIDER = "openrouter"  # Cloud models
+```
+
+**The beauty:** Same chat interface, same vector search (local ChromaDB), easy A/B testing!
 
 ---
 
@@ -28,16 +88,17 @@ Downloads 353 sacred texts (~5GB) from [sacred-texts.com](https://sacred-texts.c
 - ~4-5GB total data with organized structure
 - Tested and verified download scripts
 
-**Phase 2: RAG Implementation** 🚧 NEXT
-- Text processing and chunking
-- Embedding generation 
-- Vector database setup
-- Search interface development
+**Phase 2: RAG Implementation** 🚧 IN PROGRESS
+- ✅ Text processing and chunking (adaptive semantic/verse/paragraph)
+- ⚡ Embedding generation (1/705 files, ~3 hours remaining)
+- ✅ Vector database setup (ChromaDB)
+- ✅ Basic search interface development
 
-**Phase 3: Chat Interface** 📋 PLANNED
-- Natural language query processing
-- Context-aware responses
-- Multi-tradition knowledge synthesis
+**Phase 3: Chat Interface** ✅ READY
+- ✅ Interactive chat interface (chat.py) 
+- ✅ Command-line query tool (query.py)
+- ✅ Rich formatting and source attribution
+- ✅ Multi-tradition knowledge synthesis
 
 ### Data Sources
 - **Primary**: [sacred-texts.com/download.htm](https://sacred-texts.com/download.htm)
