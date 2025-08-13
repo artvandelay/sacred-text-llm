@@ -71,3 +71,5 @@ vector_db/
 processed_texts/
 chunks/
 data/vector_db/
+sacred-text-LLM.code-workspace
+vector_store
