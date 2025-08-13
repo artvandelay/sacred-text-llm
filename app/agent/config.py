@@ -76,11 +76,11 @@ MIN_EVIDENCE_CHUNKS = get_env_int("MIN_EVIDENCE_CHUNKS", 3)
 
 # Research expansion settings (new)
 MAX_RESEARCH_ITERATIONS = get_env_int("MAX_RESEARCH_ITERATIONS", 8)
-MAX_QUERIES_PER_ITERATION = get_env_int("MAX_QUERIES_PER_ITERATION", 5)
+MAX_QUERIES_PER_ITERATION = get_env_int("MAX_QUERIES_PER_ITERATION", 20)  # User set to 20
 RESEARCH_DEPTH_MODE = os.getenv("RESEARCH_DEPTH_MODE", "deep")  # "quick", "standard", "deep", "exhaustive"
 
 # Parallel query settings
-MAX_PARALLEL_QUERIES = get_env_int("MAX_PARALLEL_QUERIES", 3)
+MAX_PARALLEL_QUERIES = get_env_int("MAX_PARALLEL_QUERIES", 10)  # User changed from 3 to 10
 ENABLE_QUERY_REFORMULATION = get_env_bool("ENABLE_QUERY_REFORMULATION", True)
 
 # Search settings
@@ -95,6 +95,7 @@ MAX_TOTAL_EVIDENCE_CHUNKS = get_env_int("MAX_TOTAL_EVIDENCE_CHUNKS", 15)
 SHOW_AGENT_PROGRESS = get_env_bool("SHOW_AGENT_PROGRESS", True)
 SHOW_SEARCH_QUERIES = get_env_bool("SHOW_SEARCH_QUERIES", True)
 SHOW_CONFIDENCE_SCORES = get_env_bool("SHOW_CONFIDENCE_SCORES", True)
+SHOW_DETAILED_PROGRESS = get_env_bool("SHOW_DETAILED_PROGRESS", True)  # Enhanced progress display
 
 # Progress display settings
 PROGRESS_UPDATE_INTERVAL = get_env_float("PROGRESS_UPDATE_INTERVAL", 0.5)

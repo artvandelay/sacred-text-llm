@@ -253,6 +253,36 @@ class AgentProgressUI:
         time.sleep(2.0)  # Show error briefly
         self.stop()
 
+    def show_query_decomposition(self, iteration: int, original_question: str, generated_queries: List[str], reasoning: str):
+        """Show the query decomposition step in detailed progress mode"""
+        if not config.SHOW_DETAILED_PROGRESS or not self.show_progress:
+            return
+            
+        self.console.print(Panel.fit(
+            f"[bold blue]🎯 Query Decomposition (Iteration {iteration + 1})[/bold blue]\n\n"
+            f"[dim]Original Question:[/dim] {original_question}\n\n"
+            f"[dim]Strategy:[/dim] {reasoning}\n\n"
+            f"[dim]Generated Queries ({len(generated_queries)}):[/dim]\n" + 
+            "\n".join(f"  {i+1}. {query}" for i, query in enumerate(generated_queries)),
+            title="🧠 Planning",
+            border_style="blue"
+        ))
+    
+    def show_insight_synthesis(self, iteration: int, search_results: List, insight_preview: str):
+        """Show the insight synthesis step in detailed progress mode"""
+        if not config.SHOW_DETAILED_PROGRESS or not self.show_progress:
+            return
+            
+        passages_count = sum(len(getattr(result, 'documents', [])) for result in search_results)
+        
+        self.console.print(Panel.fit(
+            f"[bold green]🔬 Insight Synthesis (Iteration {iteration + 1})[/bold green]\n\n"
+            f"[dim]Synthesizing {passages_count} passages from {len(search_results)} queries[/dim]\n\n"
+            f"[dim]Preview:[/dim]\n{insight_preview}",
+            title="🧪 Synthesis", 
+            border_style="green"
+        ))
+
 
 class SimpleProgressUI:
     """
@@ -289,5 +319,35 @@ class SimpleProgressUI:
     def stop(self):
         pass
     
+    def show_query_decomposition(self, iteration: int, original_question: str, generated_queries: List[str], reasoning: str):
+        """Show the query decomposition step in detailed progress mode"""
+        if not config.SHOW_DETAILED_PROGRESS:
+            return
+            
+        self.console.print(Panel.fit(
+            f"[bold blue]🎯 Query Decomposition (Iteration {iteration + 1})[/bold blue]\n\n"
+            f"[dim]Original Question:[/dim] {original_question}\n\n"
+            f"[dim]Strategy:[/dim] {reasoning}\n\n"
+            f"[dim]Generated Queries ({len(generated_queries)}):[/dim]\n" + 
+            "\n".join(f"  {i+1}. {query}" for i, query in enumerate(generated_queries)),
+            title="🧠 Planning",
+            border_style="blue"
+        ))
+    
+    def show_insight_synthesis(self, iteration: int, search_results: List, insight_preview: str):
+        """Show the insight synthesis step in detailed progress mode"""
+        if not config.SHOW_DETAILED_PROGRESS:
+            return
+            
+        passages_count = sum(len(getattr(result, 'documents', [])) for result in search_results)
+        
+        self.console.print(Panel.fit(
+            f"[bold green]🔬 Insight Synthesis (Iteration {iteration + 1})[/bold green]\n\n"
+            f"[dim]Synthesizing {passages_count} passages from {len(search_results)} queries[/dim]\n\n"
+            f"[dim]Preview:[/dim]\n{insight_preview}",
+            title="🧪 Synthesis", 
+            border_style="green"
+        ))
+
     def show_error(self, error_msg: str):
         self.console.print(f"[red]❌ Agent error: {error_msg}[/red]")
