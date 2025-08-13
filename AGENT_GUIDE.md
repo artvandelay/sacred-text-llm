@@ -120,7 +120,7 @@ export OPENROUTER_CHAT_MODEL="anthropic/claude-3.5-sonnet"
 ### **Agent Not Starting**
 ```bash
 # Check vector store
-python check_progress.py
+python data/check_progress.py
 
 # Test basic components
 python -c "from agent_chat import SacredTextsAgent; print('✅ Import successful')"

@@ -74,6 +74,11 @@ MAX_ITERATIONS_PER_QUERY = get_env_int("MAX_ITERATIONS_PER_QUERY", 4)
 CONFIDENCE_THRESHOLD = get_env_float("CONFIDENCE_THRESHOLD", 0.75)
 MIN_EVIDENCE_CHUNKS = get_env_int("MIN_EVIDENCE_CHUNKS", 3)
 
+# Research expansion settings (new)
+MAX_RESEARCH_ITERATIONS = get_env_int("MAX_RESEARCH_ITERATIONS", 8)
+MAX_QUERIES_PER_ITERATION = get_env_int("MAX_QUERIES_PER_ITERATION", 5)
+RESEARCH_DEPTH_MODE = os.getenv("RESEARCH_DEPTH_MODE", "deep")  # "quick", "standard", "deep", "exhaustive"
+
 # Parallel query settings
 MAX_PARALLEL_QUERIES = get_env_int("MAX_PARALLEL_QUERIES", 3)
 ENABLE_QUERY_REFORMULATION = get_env_bool("ENABLE_QUERY_REFORMULATION", True)

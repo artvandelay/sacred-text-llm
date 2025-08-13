@@ -81,7 +81,7 @@ class OpenRouterProvider(LLMProvider):
                 model=model,
                 messages=messages,
                 temperature=0.7,
-                max_tokens=1000
+                max_tokens=8000  # Increased for comprehensive responses
             )
             
             return response.choices[0].message.content

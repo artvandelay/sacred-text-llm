@@ -61,14 +61,14 @@ This collection contains humanity's most treasured spiritual works:
 
 ### 1. Download Texts (if not done)
 ```bash
-python download_sacred_texts.py
+python data/download_sacred_texts.py
 ```
 
-### 2. Ingest to Vector Database (currently running)
+### 2. Ingest to Vector Database (if not done)
 ```bash
-python ingest.py --sources sacred_texts_archive/extracted --mode fast --embed-workers 1 --db-batch-size 128
+python data/ingest.py --sources sacred_texts_archive/extracted --mode fast --embed-workers 1 --db-batch-size 128
 ```
-**Current Status**: ⚡ INGESTING NOW - 212,611 docs ready, still processing (~30 mins remaining)
+**Status**: ✅ COMPLETE - 363,461 documents indexed and ready
 
 ### 3. Query the Sacred Texts
 ```bash

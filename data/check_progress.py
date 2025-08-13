@@ -4,14 +4,18 @@ Check ingestion progress and system status
 """
 
 import os
+import sys
 import subprocess
 import chromadb
+
+# Add parent directory to path so we can import from app
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.chat.config import VECTOR_STORE_DIR, COLLECTION_NAME
 
 def check_ingestion_process():
     """Check if ingestion is running"""
     try:
-        result = subprocess.run(['pgrep', '-f', 'python.*ingest.py'], 
+        result = subprocess.run(['pgrep', '-f', 'python.*data/ingest.py'], 
                               capture_output=True, text=True)
         if result.returncode == 0:
             pid = result.stdout.strip()
@@ -43,7 +47,7 @@ def check_vector_store():
 
 def check_log_file():
     """Check recent log entries"""
-    log_file = "logs/ingest.log"
+    log_file = "../logs/ingest.log"
     if not os.path.exists(log_file):
         return "❌ Log file not found"
     
@@ -74,6 +78,7 @@ def main():
     print("• Monitor progress: tail -f logs/ingest.log")
     print("• Test chat: python chat.py")
     print("• Simple query: python query.py 'your question'")
+    print("• Check progress: python data/check_progress.py")
 
 if __name__ == "__main__":
     main()
