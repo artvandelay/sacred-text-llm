@@ -119,104 +119,214 @@ class SacredTextsAgent:
         results.sort(key=lambda r: query_order.get(r.query, 999))
         return results
 
-    def plan_search_strategy(self, state: AgentState) -> Dict[str, Any]:
-        """LLM plans what to search for next"""
+    def generate_research_queries(self, state: AgentState, accumulated_insights: List[str] = None) -> Dict[str, Any]:
+        """Generate diverse research queries for deep investigation"""
         current_evidence = state.get_evidence_summary()
         search_history = state.get_search_history()
+        
+        # Build context based on whether we have accumulated insights
+        context_section = ""
+        if accumulated_insights:
+            insights_text = "\n".join(f"- {insight}" for insight in accumulated_insights)
+            context_section = f"""
+ACCUMULATED INSIGHTS FROM PREVIOUS RESEARCH:
+{insights_text}
+
+Based on these insights, generate queries that:
+1. Explore concepts, terms, or perspectives mentioned but not fully explained
+2. Seek deeper understanding or different viewpoints 
+3. Look for practical applications or examples
+4. Investigate related traditions or complementary teachings
+"""
+        else:
+            context_section = """
+This is the initial research phase. Generate diverse queries that:
+1. Explore different aspects and dimensions of the question
+2. Look for various traditions and perspectives
+3. Seek both theoretical understanding and practical applications
+4. Consider historical, mystical, and philosophical angles
+"""
+
         planning_prompt = f"""
-You are a research assistant planning searches through sacred texts to answer a spiritual question.
+You are a deep research assistant investigating sacred texts with scholarly rigor.
 
-QUESTION: {state.original_question}
+ORIGINAL QUESTION: {state.original_question}
 
-CURRENT EVIDENCE: 
+CURRENT EVIDENCE SUMMARY: 
 {current_evidence if current_evidence != "No evidence collected yet." else "None collected yet."}
 
 PREVIOUS SEARCH QUERIES:
 {chr(10).join(f"- {q}" for q in search_history) if search_history else "None yet."}
 
-Your task: Plan the next search strategy. Consider:
-1. What aspects of the question are still unclear or need more evidence?
-2. What specific terms, concepts, or traditions should we search for?
-3. Should we search broadly or focus on specific aspects?
+{context_section}
 
-If we already have sufficient evidence to answer the question well, set needs_search to false.
+Your task: Generate {config.MAX_QUERIES_PER_ITERATION} diverse, specific research queries that will provide comprehensive coverage of the topic. Each query should:
+
+- Be specific enough to retrieve relevant passages
+- Explore different angles, traditions, or concepts
+- Build upon or complement previous research
+- Use varied terminology (synonyms, traditional terms, modern concepts)
 
 Respond in JSON format:
 {{
-    "needs_search": boolean,
-    "reasoning": "Why we need more searches or why current evidence is sufficient",
-    "search_queries": ["query1", "query2", "query3"],
-    "search_focus": "What these searches aim to find",
-    "confidence_estimate": 0.0-1.0
+    "reasoning": "Your strategic thinking about what areas need investigation and why these specific queries will advance understanding",
+    "search_queries": ["query1", "query2", "query3", "query4", "query5"],
+    "research_focus": "What these searches collectively aim to accomplish",
+    "expected_insights": "What types of insights or understanding you expect these queries to reveal"
 }}
 
-Generate 1-{config.MAX_PARALLEL_QUERIES} diverse search queries if needed.
+Generate exactly {config.MAX_QUERIES_PER_ITERATION} diverse search queries.
 """
         try:
             response = self.llm_provider.generate_response(
                 [
                     {
-                        "role": "system",
-                        "content": "You are a strategic research planner for sacred texts. Be precise and thoughtful.",
+                        "role": "system", 
+                        "content": "You are a deep research strategist specializing in sacred texts and spiritual inquiry. Be thorough and scholarly in your approach."
                     },
                     {"role": "user", "content": planning_prompt},
                 ],
                 self.chat_model,
             )
             fallback = {
-                "needs_search": True,
-                "reasoning": "Planning failed, defaulting to basic search",
+                "reasoning": "Query generation failed, using basic search approach",
                 "search_queries": [state.original_question],
-                "search_focus": "Basic search for the original question",
-                "confidence_estimate": 0.3,
+                "research_focus": "Basic search for the original question",
+                "expected_insights": "Direct answers to the question"
             }
             return parse_json_response(response, fallback)
         except Exception as e:
-            self.console.print(f"[red]Planning error: {e}[/red]")
-            return {
-                "needs_search": True,
-                "reasoning": "Planning failed, defaulting to basic search",
-                "search_queries": [state.original_question],
-                "search_focus": "Basic search for the original question",
-                "confidence_estimate": 0.3,
-            }
+            self.console.print(f"[red]Query generation error: {e}[/red]")
+            return fallback
 
-    def reflect_on_evidence(self, state: AgentState) -> Dict[str, Any]:
-        """LLM evaluates current evidence sufficiency"""
-        evidence_summary = state.get_evidence_summary()
-        reflection_prompt = f"""
-You are evaluating evidence collected to answer a spiritual question.
+    def summarize_search_batch(self, search_results: List[SearchResult], original_question: str) -> str:
+        """Synthesize all retrieved passages from a search iteration into coherent insights"""
+        if not search_results:
+            return "No search results to summarize."
+        
+        # Group passages by source and query for better organization
+        passages_text = ""
+        for i, result in enumerate(search_results, 1):
+            passages_text += f"\n--- Search Result {i} (Query: '{result.query}') ---\n"
+            # Extract source from first document's metadata if available
+            source = "Unknown"
+            if result.metadatas and len(result.metadatas) > 0:
+                source = result.metadatas[0].get('source', 'Unknown')
+            passages_text += f"Source: {source}\n"
+            # Use documents content (SearchResult has documents, not content)
+            for j, doc in enumerate(result.documents):
+                passages_text += f"Content {j+1}: {doc}\n"
+        
+        synthesis_prompt = f"""
+You are a scholar synthesizing retrieved passages from sacred texts to develop deep insights.
 
-QUESTION: {state.original_question}
+ORIGINAL RESEARCH QUESTION: {original_question}
 
-EVIDENCE COLLECTED:
-{evidence_summary}
+RETRIEVED PASSAGES:
+{passages_text}
 
-SEARCH QUERIES USED:
-{chr(10).join(f"- {q}" for q in state.get_search_history())}
+Your task: Synthesize these passages into coherent, scholarly insights that advance understanding of the research question. Focus on:
 
-Evaluate the evidence:
-1. How confident are you that this evidence can answer the question? (0.0 = no confidence, 1.0 = very confident)
-2. What gaps exist in the evidence?
-3. Are there important perspectives or traditions missing?
-4. Should we search for more information?
+1. **Key Concepts & Themes**: What major ideas, principles, or teachings emerge?
+2. **Cross-References & Connections**: How do different passages relate to or complement each other?
+3. **Deeper Implications**: What profound insights or wisdom can be drawn from these texts?
+4. **Practical Applications**: How might these teachings apply to spiritual practice or life?
+5. **Areas for Further Investigation**: What questions or concepts mentioned here deserve deeper exploration?
 
-Respond in JSON format:
-{{
-    "confidence": 0.0-1.0,
-    "evidence_quality": "excellent|good|fair|poor",
-    "gaps_identified": ["gap1", "gap2"],
-    "needs_more_search": boolean,
-    "reasoning": "Detailed reasoning for your assessment",
-    "coverage_assessment": "What the evidence covers well and what it misses"
-}}
+Provide a thoughtful synthesis that:
+- Integrates information from multiple passages
+- Identifies patterns and recurring themes
+- Draws out deeper meaning and significance
+- Maintains scholarly rigor while being accessible
+- Highlights both convergent and divergent perspectives where present
+
+Write your synthesis as a flowing, comprehensive analysis (not bullet points).
 """
         try:
             response = self.llm_provider.generate_response(
                 [
                     {
                         "role": "system",
-                        "content": "You are an evidence evaluator for spiritual research. Be honest about gaps and limitations.",
+                        "content": "You are a sacred texts scholar specializing in synthesis and deep textual analysis. Provide thoughtful, nuanced interpretations that honor the wisdom traditions while offering clear insights."
+                    },
+                    {"role": "user", "content": synthesis_prompt}
+                ],
+                self.chat_model,
+            )
+            return response
+        except Exception as e:
+            self.console.print(f"[red]Synthesis error: {e}[/red]")
+            # Fallback to simple concatenation
+            simple_summary = f"Retrieved {len(search_results)} passages related to: {original_question}\n\n"
+            for result in search_results[:3]:  # Show first 3 for brevity
+                simple_summary += f"- {result.content[:200]}...\n"
+            return simple_summary
+
+    def reflect_on_evidence(self, state: AgentState, accumulated_insights: List[str] = None, current_iteration: int = 0) -> Dict[str, Any]:
+        """Enhanced reflection with depth assessment and accumulated insights consideration"""
+        evidence_summary = state.get_evidence_summary()
+        search_history = state.get_search_history()
+        
+        # Build accumulated insights context
+        insights_context = ""
+        if accumulated_insights:
+            insights_text = "\n".join(f"- {insight}" for insight in accumulated_insights)
+            insights_context = f"""
+ACCUMULATED INSIGHTS FROM RESEARCH:
+{insights_text}
+
+"""
+
+        reflection_prompt = f"""
+You are evaluating the depth and completeness of research on a spiritual question.
+
+ORIGINAL QUESTION: {state.original_question}
+
+{insights_context}CURRENT EVIDENCE SUMMARY:
+{evidence_summary}
+
+SEARCH QUERIES USED:
+{chr(10).join(f"- {q}" for q in search_history)}
+
+RESEARCH CONTEXT:
+- Current iteration: {current_iteration + 1}
+- Maximum iterations allowed: {config.MAX_RESEARCH_ITERATIONS}
+
+Your task: Provide a comprehensive assessment of research completeness and depth. Consider:
+
+1. **Depth Assessment**: How thoroughly has the question been explored?
+   - Surface level: Basic definitions and simple answers
+   - Moderate depth: Multiple perspectives, some analysis
+   - Deep level: Comprehensive understanding, synthesis, practical wisdom
+   - Scholarly depth: Nuanced analysis, cross-references, profound insights
+
+2. **Coverage Assessment**: What aspects are well-covered vs. what's missing?
+
+3. **Research Quality**: Are the insights substantive and well-supported?
+
+4. **Termination Decision**: Should research continue or can we provide a comprehensive response?
+
+Respond in JSON format:
+{{
+    "confidence": 0.0-1.0,
+    "evidence_quality": "excellent|good|fair|poor",
+    "depth_assessment": "surface|moderate|deep|scholarly",
+    "gaps_identified": ["specific gap 1", "specific gap 2"],
+    "needs_more_research": boolean,
+    "reasoning": "Detailed reasoning for your assessment and decision",
+    "coverage_assessment": "What the evidence covers well and what it misses",
+    "research_completeness": 0.0-1.0,
+    "termination_confidence": 0.0-1.0
+}}
+
+Consider that deeper questions may need multiple iterations to achieve scholarly depth, while simpler questions might be adequately answered sooner.
+"""
+        try:
+            response = self.llm_provider.generate_response(
+                [
+                    {
+                        "role": "system",
+                        "content": "You are a research depth assessor specializing in spiritual and philosophical inquiry. Balance thoroughness with practical completion. Be honest about limitations while recognizing when sufficient depth has been achieved."
                     },
                     {"role": "user", "content": reflection_prompt},
                 ],
@@ -224,25 +334,91 @@ Respond in JSON format:
             )
             fallback = {
                 "confidence": 0.5,
-                "evidence_quality": "fair",
-                "gaps_identified": ["Unknown gaps due to reflection failure"],
-                "needs_more_search": True,
-                "reasoning": "Reflection failed, being conservative",
+                "evidence_quality": "fair", 
+                "depth_assessment": "moderate",
+                "gaps_identified": ["Assessment failed - assuming gaps exist"],
+                "needs_more_research": current_iteration < 2,  # Conservative default
+                "reasoning": "Reflection failed, using conservative assessment",
                 "coverage_assessment": "Cannot assess due to reflection failure",
+                "research_completeness": 0.5,
+                "termination_confidence": 0.3
             }
             return parse_json_response(response, fallback)
-        except Exception:
-            return {
-                "confidence": 0.5,
-                "evidence_quality": "fair",
-                "gaps_identified": ["Unknown gaps due to reflection failure"],
-                "needs_more_search": True,
-                "reasoning": "Reflection failed, being conservative",
-                "coverage_assessment": "Cannot assess due to reflection failure",
-            }
+        except Exception as e:
+            self.console.print(f"[red]Reflection error: {e}[/red]")
+            return fallback
+
+    def generate_final_response_from_insights(self, state: AgentState, accumulated_insights: List[str]) -> str:
+        """Generate the final response using accumulated insights from deep research"""
+        
+        # Include recent chat history for context
+        chat_context = ""
+        if hasattr(state, 'chat_history') and state.chat_history:
+            recent_history = state.chat_history[-3:]  # Last 3 exchanges
+            chat_context = "RECENT CONVERSATION CONTEXT:\n"
+            for exchange in recent_history:
+                chat_context += f"Human: {exchange.get('human', '')}\n"
+                chat_context += f"Assistant: {exchange.get('assistant', '')[:200]}...\n\n"
+        
+        insights_text = "\n\n".join(f"=== Research Iteration {i+1} ===\n{insight}" 
+                                  for i, insight in enumerate(accumulated_insights))
+        
+        response_prompt = f"""
+You are a profound spiritual teacher synthesizing wisdom from extensive research through sacred texts.
+
+{chat_context}CURRENT QUESTION: {state.original_question}
+
+COMPREHENSIVE RESEARCH INSIGHTS:
+{insights_text}
+
+Your task: Provide a masterful, comprehensive response that demonstrates the depth of your research. Your response should:
+
+**STRUCTURE & DEPTH:**
+1. **Opening**: Acknowledge the depth and complexity of the question
+2. **Core Teachings**: Present the fundamental principles and wisdom discovered
+3. **Multiple Perspectives**: Weave together insights from different traditions where relevant
+4. **Deeper Synthesis**: Show how different teachings complement or contrast with each other
+5. **Practical Wisdom**: Offer actionable insights for spiritual practice or life application
+6. **Contemplative Closing**: End with profound reflections or questions for further contemplation
+
+**SCHOLARLY APPROACH:**
+- Demonstrate mastery by connecting themes across your research
+- Include specific references to texts, concepts, or traditions when relevant
+- Show nuanced understanding rather than surface-level answers
+- Acknowledge complexity and avoid oversimplification
+- Honor the wisdom of each tradition while finding universal principles
+
+**TONE & STYLE:**
+- Write with the authority of deep study and contemplation
+- Be reverent yet accessible
+- Use rich, thoughtful language appropriate for spiritual discourse
+- Balance scholarly depth with practical wisdom
+
+Your response should feel like the culmination of extensive spiritual scholarship - comprehensive, nuanced, and profoundly insightful.
+"""
+        
+        try:
+            response = self.llm_provider.generate_response(
+                [
+                    {
+                        "role": "system",
+                        "content": "You are a master spiritual teacher and scholar who has spent extensive time researching sacred texts. Your responses demonstrate profound understanding, synthesis across traditions, and practical wisdom. You write with the depth and authority that comes from genuine spiritual scholarship."
+                    },
+                    {"role": "user", "content": response_prompt},
+                ],
+                self.chat_model,
+            )
+            return response
+        except Exception as e:
+            self.console.print(f"[red]Final response generation error: {e}[/red]")
+            # Fallback to basic response using insights
+            fallback_response = f"Based on my research into your question '{state.original_question}', here are the key insights I discovered:\n\n"
+            for i, insight in enumerate(accumulated_insights, 1):
+                fallback_response += f"**Research Phase {i}:**\n{insight}\n\n"
+            return fallback_response
 
     def generate_final_response(self, state: AgentState) -> str:
-        """Generate the final response using all collected evidence"""
+        """Legacy method - generate basic final response using evidence (kept for compatibility)"""
         evidence_summary = state.get_evidence_summary()
         response_prompt = f"""
 You are a wise spiritual guide with access to sacred texts from many traditions.
@@ -300,7 +476,12 @@ Generate a comprehensive response that draws wisdom from the sacred texts provid
         try:
             while True:
                 # Get user question
-                question = Prompt.ask("\n[bold cyan]Your question[/bold cyan]").strip()
+                try:
+                    question = Prompt.ask("\n[bold cyan]Your question[/bold cyan]").strip()
+                except EOFError:
+                    # Handle piped input gracefully
+                    self.console.print("\n[dim]Input stream ended. Goodbye! 🙏[/dim]")
+                    break
                 
                 if not question:
                     continue
@@ -337,96 +518,142 @@ Generate a comprehensive response that draws wisdom from the sacred texts provid
 
     def agent_response(self, question: str) -> str:
         """
-        Main agentic response loop:
-        Plan → Search (parallel) → Reflect → Decide → Repeat or Respond
+        Enhanced iterative research loop:
+        Generate Queries → Search (parallel) → Summarize → Reflect → Decide → Repeat or Respond
         """
         state = AgentState(
             original_question=question,
-            max_iterations=config.MAX_ITERATIONS_PER_QUERY,
+            max_iterations=config.MAX_RESEARCH_ITERATIONS,  # Use research iterations limit
             confidence_threshold=config.CONFIDENCE_THRESHOLD,
             max_parallel_queries=config.MAX_PARALLEL_QUERIES,
         )
 
+        accumulated_insights = []  # Track insights across iterations
+        
         # Start progress tracking
         self.progress_ui.start_session(question)
+        
         try:
-            for iteration in range(state.max_iterations):
+            for iteration in range(config.MAX_RESEARCH_ITERATIONS):
                 state.current_iteration = iteration
                 current_iter = state.start_iteration()
 
-                # Planning
+                # === QUERY GENERATION ===
                 state.set_step(AgentStep.PLANNING)
-                self.progress_ui.update_step(AgentStep.PLANNING, f"Planning iteration {iteration + 1}")
-                plan = self.plan_search_strategy(state)
-                current_iter.plan = plan
+                self.progress_ui.update_step(AgentStep.PLANNING, f"Generating research queries (iteration {iteration + 1})")
+                
+                query_plan = self.generate_research_queries(state, accumulated_insights if iteration > 0 else None)
+                current_iter.plan = query_plan
+                
+                # Show detailed query decomposition
+                if config.SHOW_DETAILED_PROGRESS:
+                    self.progress_ui.show_query_decomposition(
+                        iteration,
+                        question, 
+                        query_plan.get("search_queries", []),
+                        query_plan.get("reasoning", "")
+                    )
+                
                 self.progress_ui.complete_step(
                     AgentStep.PLANNING,
-                    plan.get("reasoning", "Strategy planned"),
-                    [f"Focus: {plan.get('search_focus', 'General search')}"]
+                    query_plan.get("reasoning", "Queries generated"),
+                    [f"Generated {len(query_plan.get('search_queries', []))} research queries"]
                 )
 
-                if not plan.get("needs_search", True):
-                    state.complete(self.generate_final_response(state), "sufficient_evidence", plan.get("confidence_estimate", 0.8))
-                    break
-
-                # Searching
-                search_queries = plan.get("search_queries", [state.original_question])
-                search_queries = search_queries[: config.MAX_PARALLEL_QUERIES]
+                # === PARALLEL SEARCH ===
+                search_queries = query_plan.get("search_queries", [question])
+                # Use all generated queries, not limited by parallel processing limit
+                # (search_parallel method will handle batching internally if needed)
+                
                 state.set_step(AgentStep.SEARCHING)
                 self.progress_ui.show_parallel_searches(search_queries)
+                
                 search_results = self.search_parallel(search_queries)
                 for result in search_results:
                     state.add_search_result(result)
+                
                 total_docs_found = sum(len(r.documents) for r in search_results)
                 self.progress_ui.complete_step(
                     AgentStep.SEARCHING,
-                    f"Found {total_docs_found} relevant passages",
+                    f"Found {total_docs_found} relevant passages across {len(search_queries)} queries",
                     [f"Query: {r.query} → {len(r.documents)} results" for r in search_results],
                 )
 
-                # Reflection
+                # === BATCH SUMMARIZATION ===
                 state.set_step(AgentStep.REFLECTING)
-                self.progress_ui.update_step(AgentStep.REFLECTING, "Evaluating evidence sufficiency")
-                reflection = self.reflect_on_evidence(state)
+                self.progress_ui.update_step(AgentStep.REFLECTING, "Synthesizing retrieved passages")
+                
+                # Synthesize all search results from this iteration into coherent insights
+                iteration_insight = self.summarize_search_batch(search_results, question)
+                accumulated_insights.append(iteration_insight)
+                
+                # Show detailed insight synthesis
+                if config.SHOW_DETAILED_PROGRESS:
+                    insight_preview = iteration_insight[:200] + "..." if len(iteration_insight) > 200 else iteration_insight
+                    self.progress_ui.show_insight_synthesis(iteration, search_results, insight_preview)
+
+                # === ENHANCED REFLECTION ===
+                self.progress_ui.update_step(AgentStep.REFLECTING, "Assessing research depth and completeness")
+                
+                reflection = self.reflect_on_evidence(state, accumulated_insights, iteration)
                 current_iter.reflection = reflection
                 current_iter.confidence = reflection.get("confidence", 0.0)
+                
                 confidence = reflection.get("confidence", 0.0)
-                evidence_count = len(state.all_evidence)
-                self.progress_ui.show_evidence_evaluation(confidence, evidence_count)
+                depth_assessment = reflection.get("depth_assessment", "moderate")
+                research_completeness = reflection.get("research_completeness", 0.5)
+                
+                self.progress_ui.show_evidence_evaluation(confidence, len(state.all_evidence))
                 self.progress_ui.complete_step(
                     AgentStep.REFLECTING,
-                    f"Confidence: {confidence:.1%}",
+                    f"Depth: {depth_assessment} | Completeness: {research_completeness:.1%}",
                     [
+                        f"Confidence: {confidence:.1%}",
                         f"Quality: {reflection.get('evidence_quality', 'unknown')}",
-                        f"Gaps: {', '.join(reflection.get('gaps_identified', []))}",
+                        f"Continue research: {'Yes' if reflection.get('needs_more_research', True) else 'No'}",
                     ],
                 )
 
-                # Decision
-                if confidence >= state.confidence_threshold:
-                    state.complete(self.generate_final_response(state), "confidence_threshold", confidence)
+                # === TERMINATION DECISION ===
+                # Agent decides when it has achieved sufficient depth
+                needs_more_research = reflection.get("needs_more_research", True)
+                termination_confidence = reflection.get("termination_confidence", 0.5)
+                
+                if not needs_more_research and termination_confidence > 0.7:
+                    self.console.print(f"[green]✓ Research complete after {iteration + 1} iterations (agent decision)[/green]")
                     break
-                if not reflection.get("needs_more_search", True):
-                    state.complete(self.generate_final_response(state), "no_more_search_needed", confidence)
+                    
+                if confidence >= state.confidence_threshold and research_completeness > 0.8:
+                    self.console.print(f"[green]✓ High confidence threshold reached[/green]")
                     break
+                    
                 if len(state.all_evidence) >= config.MAX_TOTAL_EVIDENCE_CHUNKS:
-                    state.complete(self.generate_final_response(state), "max_evidence_reached", confidence)
+                    self.console.print(f"[yellow]⚠ Maximum evidence limit reached[/yellow]")
                     break
 
-            if not state.is_complete:
-                state.complete(
-                    self.generate_final_response(state),
-                    "max_iterations",
-                    current_iter.confidence if current_iter else 0.0,
-                )
+                # Continue to next iteration
+                if iteration < config.MAX_RESEARCH_ITERATIONS - 1:
+                    self.console.print(f"[blue]→ Continuing to iteration {iteration + 2}[/blue]")
 
-            if not state.final_response:
-                state.set_step(AgentStep.GENERATING)
-                self.progress_ui.update_step(AgentStep.GENERATING, "Synthesizing final response")
-                state.final_response = self.generate_final_response(state)
+            # === FINAL RESPONSE GENERATION ===
+            state.set_step(AgentStep.GENERATING)
+            self.progress_ui.update_step(AgentStep.GENERATING, "Generating comprehensive response from research")
+            
+            # Use accumulated insights for final response
+            final_response = self.generate_final_response_from_insights(state, accumulated_insights)
+            
+            state.complete(final_response, "research_complete", reflection.get("confidence", 0.8))
+            
+            # Show detailed final response info
+            insights_summary = f"Synthesized {len(accumulated_insights)} research iterations into comprehensive response"
+            self.progress_ui.complete_step(
+                AgentStep.GENERATING,
+                insights_summary,
+                [f"Response length: {len(final_response)} characters", f"Research depth: {depth_assessment}"]
+            )
 
-            self.progress_ui.finish_session(state.final_response, state)
-            return state.final_response
+            self.progress_ui.finish_session(final_response, state)
+            return final_response
 
         except Exception as e:
             error_msg = f"Agent encountered an error: {e}"
