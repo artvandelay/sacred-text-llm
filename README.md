@@ -42,9 +42,6 @@ This collection contains humanity's most treasured spiritual works:
 - Indigenous wisdom traditions
 - Hermetic and esoteric texts
 
-**🌟 Total Literary Value:**
-At today's book prices (~$15-25 each), this collection represents **$4,400-7,400 worth** of spiritual literature, freely searchable and accessible through AI.
-
 ## ✨ **What Makes This Special**
 - **🧠 Semantic Search**: Find wisdom by meaning, not just keywords
 - **🤖 Modular AI**: Switch between local models (Ollama) and cloud APIs (GPT-4, Claude)
@@ -75,11 +72,14 @@ python ingest.py --sources sacred_texts_archive/extracted --mode fast --embed-wo
 
 ### 3. Query the Sacred Texts
 ```bash
-# Simple query (works now with partial data)
+# Simple query (single-shot retrieval)
 python query.py "What is the meaning of compassion?"
 
 # Interactive chat (enhanced interface)
 python chat.py
+
+# 🤖 Agentic chat (advanced iterative agent)
+python agent_chat.py
 ```
 
 ⚠️ **Important**: Ingestion is still running. The chat interface works with current data (212K+ docs) but will have complete coverage once ingestion finishes.
@@ -126,6 +126,46 @@ LLM_PROVIDER = "openrouter"  # Cloud models
 ```
 
 **The beauty:** Same chat interface, same vector search (local ChromaDB), easy A/B testing!
+
+## 🤖 **Agentic Chat Interface**
+
+The advanced `agent_chat.py` provides an iterative AI agent that thinks, plans, and searches multiple times before responding:
+
+### **Agent Capabilities:**
+- **🧠 Strategic Planning**: Analyzes your question and plans search strategy
+- **🔍 Parallel Search**: Runs multiple refined searches simultaneously  
+- **🤔 Evidence Evaluation**: Reflects on sufficiency before responding
+- **⚡ Iterative Refinement**: Continues searching until confident or max iterations
+- **📊 Progress Tracking**: Shows thinking process in real-time (like Cursor/Perplexity)
+
+### **Agent Configuration:**
+```bash
+# Use environment variables or defaults in agent_config.py
+export MAX_ITERATIONS_PER_QUERY=4        # Max search iterations
+export CONFIDENCE_THRESHOLD=0.75         # Stop when this confident
+export MAX_PARALLEL_QUERIES=3            # Simultaneous searches
+export SHOW_AGENT_PROGRESS=true          # Show thinking process
+```
+
+### **Best For:**
+- **Complex spiritual questions** requiring multiple perspectives
+- **Cross-tradition comparisons** (Buddhism vs Christianity vs Islam)
+- **Deep philosophical inquiries** needing comprehensive evidence
+- **Research-quality responses** with multiple sources
+
+### **Example Agent Behavior:**
+```
+🤖 Thinking about: "How do different traditions view suffering?"
+
+🧠 Planning: Strategy planned → Focus: Cross-tradition perspectives on suffering
+🔍 Searching: Running 3 parallel queries...
+    • Buddhist teachings on suffering and dukkha
+    • Christian perspectives on suffering and redemption  
+    • Islamic views on suffering and divine wisdom
+🤔 Reflecting: Confidence: 85% → Quality: excellent
+✍️ Generating: Synthesizing final response
+✅ Complete in 2 iterations
+```
 
 ---
 

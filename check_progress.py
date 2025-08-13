@@ -43,7 +43,7 @@ def check_vector_store():
 
 def check_log_file():
     """Check recent log entries"""
-    log_file = "ingest.log"
+    log_file = "logs/ingest.log"
     if not os.path.exists(log_file):
         return "❌ Log file not found"
     
@@ -71,7 +71,7 @@ def main():
     
     print("\n" + "=" * 40)
     print("Commands:")
-    print("• Monitor progress: tail -f ingest.log")
+    print("• Monitor progress: tail -f logs/ingest.log")
     print("• Test chat: python chat.py")
     print("• Simple query: python query.py 'your question'")
 

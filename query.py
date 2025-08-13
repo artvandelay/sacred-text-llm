@@ -9,7 +9,7 @@ from config import (
     EMBEDDING_MODEL, VECTOR_STORE_DIR, COLLECTION_NAME,
     LLM_PROVIDER, OLLAMA_CHAT_MODEL, OPENROUTER_CHAT_MODEL
 )
-from providers import create_provider
+from app.providers import create_provider
 
 
 def build_prompt(question: str, context: str) -> str:

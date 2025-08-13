@@ -15,3 +15,6 @@ rich>=13.0.0
 
 # LLM Providers (Phase 2)
 openai>=1.0.0  # For OpenRouter API access
+
+# Agentic Chat (Phase 3)
+# No additional dependencies needed - uses existing packages
