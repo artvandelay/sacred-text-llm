@@ -353,12 +353,16 @@ Consider that deeper questions may need multiple iterations to achieve scholarly
         
         # Include recent chat history for context
         chat_context = ""
-        if hasattr(state, 'chat_history') and state.chat_history:
-            recent_history = state.chat_history[-3:]  # Last 3 exchanges
+        if self.chat_history:
+            recent_history = self.chat_history[-3:]  # Last 3 exchanges
             chat_context = "RECENT CONVERSATION CONTEXT:\n"
             for exchange in recent_history:
-                chat_context += f"Human: {exchange.get('human', '')}\n"
-                chat_context += f"Assistant: {exchange.get('assistant', '')[:200]}...\n\n"
+                human_msg = exchange.get('content', '') if exchange.get('role') == 'user' else ''
+                assistant_msg = exchange.get('content', '') if exchange.get('role') == 'assistant' else ''
+                if human_msg:
+                    chat_context += f"Human: {human_msg}\n"
+                if assistant_msg:
+                    chat_context += f"Assistant: {assistant_msg[:200]}...\n\n"
         
         insights_text = "\n\n".join(f"=== Research Iteration {i+1} ===\n{insight}" 
                                   for i, insight in enumerate(accumulated_insights))
@@ -529,6 +533,8 @@ Generate a comprehensive response that draws wisdom from the sacred texts provid
         )
 
         accumulated_insights = []  # Track insights across iterations
+        reflection = None  # Initialize reflection for use after loop
+        depth_assessment = "moderate"  # Initialize depth assessment
         
         # Start progress tracking
         self.progress_ui.start_session(question)
@@ -642,7 +648,7 @@ Generate a comprehensive response that draws wisdom from the sacred texts provid
             # Use accumulated insights for final response
             final_response = self.generate_final_response_from_insights(state, accumulated_insights)
             
-            state.complete(final_response, "research_complete", reflection.get("confidence", 0.8))
+            state.complete(final_response, "research_complete", reflection.get("confidence", 0.8) if reflection else 0.8)
             
             # Show detailed final response info
             insights_summary = f"Synthesized {len(accumulated_insights)} research iterations into comprehensive response"
