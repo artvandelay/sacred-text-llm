@@ -1,5 +1,6 @@
 # Sacred Texts Archive Downloads
 sacred_texts_archive/
+vector_store/
 test_*/
 *.log
 download_progress.json
@@ -36,6 +37,7 @@ Thumbs.db
 
 # Logs
 logs/
+!logs/README.md
 *.log
 npm-debug.log*
 yarn-debug.log*
