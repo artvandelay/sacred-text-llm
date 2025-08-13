@@ -12,7 +12,7 @@ from tqdm import tqdm
 import ollama
 import time
 
-from config import EMBEDDING_MODEL, VECTOR_STORE_DIR, COLLECTION_NAME
+from app.chat.config import EMBEDDING_MODEL, VECTOR_STORE_DIR, COLLECTION_NAME
 from llama_index.core import Document
 from llama_index.core.node_parser import SemanticSplitterNodeParser
 from llama_index.embeddings.ollama import OllamaEmbedding

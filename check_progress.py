@@ -6,7 +6,7 @@ Check ingestion progress and system status
 import os
 import subprocess
 import chromadb
-from config import VECTOR_STORE_DIR, COLLECTION_NAME
+from app.chat.config import VECTOR_STORE_DIR, COLLECTION_NAME
 
 def check_ingestion_process():
     """Check if ingestion is running"""
