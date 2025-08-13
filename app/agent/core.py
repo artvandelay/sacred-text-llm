@@ -147,10 +147,24 @@ This is the initial research phase. Generate diverse queries that:
 4. Consider historical, mystical, and philosophical angles
 """
 
+        # Include recent chat history for context (especially important for follow-up questions)
+        chat_context = ""
+        if self.chat_history:
+            recent_history = self.chat_history[-4:]  # Last 2 exchanges (4 messages)
+            chat_context = "RECENT CONVERSATION CONTEXT:\n"
+            for exchange in recent_history:
+                role = exchange.get('role', '')
+                content = exchange.get('content', '')
+                if role == 'user':
+                    chat_context += f"Human: {content}\n"
+                elif role == 'assistant':
+                    chat_context += f"Assistant: {content[:150]}...\n"
+            chat_context += "\n"
+
         planning_prompt = f"""
 You are a deep research assistant investigating sacred texts with scholarly rigor.
 
-ORIGINAL QUESTION: {state.original_question}
+{chat_context}CURRENT QUESTION: {state.original_question}
 
 CURRENT EVIDENCE SUMMARY: 
 {current_evidence if current_evidence != "No evidence collected yet." else "None collected yet."}
@@ -160,11 +174,16 @@ PREVIOUS SEARCH QUERIES:
 
 {context_section}
 
-Your task: Generate {config.MAX_QUERIES_PER_ITERATION} diverse, specific research queries that will provide comprehensive coverage of the topic. Each query should:
+Your task: 
+
+IMPORTANT: If this appears to be a follow-up question that clarifies or refines the previous question, focus your queries on that specific clarification rather than starting completely fresh research.
+
+Generate {config.MAX_QUERIES_PER_ITERATION} diverse, specific research queries that will provide comprehensive coverage of the topic. Each query should:
 
 - Be specific enough to retrieve relevant passages
-- Explore different angles, traditions, or concepts
-- Build upon or complement previous research
+- If this is a follow-up question, directly address the clarification requested
+- Explore different angles, traditions, or concepts relevant to the current question
+- Build upon or complement previous research when appropriate
 - Use varied terminology (synonyms, traditional terms, modern concepts)
 
 Respond in JSON format:
@@ -282,6 +301,11 @@ You are evaluating the depth and completeness of research on a spiritual questio
 
 ORIGINAL QUESTION: {state.original_question}
 
+QUESTION TYPE ASSESSMENT: First determine if this is:
+- A simple factual question that can be answered directly with specific names, dates, or facts
+- A complex philosophical/theological question requiring deep exploration
+- A follow-up question seeking clarification or specific details
+
 {insights_context}CURRENT EVIDENCE SUMMARY:
 {evidence_summary}
 
@@ -319,7 +343,11 @@ Respond in JSON format:
     "termination_confidence": 0.0-1.0
 }}
 
-Consider that deeper questions may need multiple iterations to achieve scholarly depth, while simpler questions might be adequately answered sooner.
+TERMINATION GUIDANCE:
+- For simple factual questions (names, dates, basic facts): Terminate after first iteration if you have clear answers
+- For follow-up questions seeking clarification: Terminate quickly if the clarification is provided
+- For complex philosophical questions: Continue research until scholarly depth is achieved
+- If the user is asking for "just names" or specific facts, prioritize concrete answers over deep analysis
 """
         try:
             response = self.llm_provider.generate_response(
