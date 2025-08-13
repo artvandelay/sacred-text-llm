@@ -279,6 +279,62 @@ Generate a comprehensive response that draws wisdom from the sacred texts provid
         except Exception as e:
             return f"I apologize, but I encountered an error generating the response: {e}"
 
+    def run(self) -> None:
+        """
+        Interactive chat loop for the Sacred Texts Agent
+        """
+        self.console.print(Panel.fit("🕉️ Sacred Texts Agent", style="bold cyan"))
+        self.console.print("Ask questions about spiritual wisdom from sacred texts across traditions.")
+        
+        # Show which model is being used
+        provider = config.LLM_PROVIDER
+        model = self.chat_model
+        self.console.print(f"[dim]Using {provider} with model: {model}[/dim]")
+        self.console.print("[dim]Type 'quit', 'exit', or press Ctrl+C to stop.[/dim]\n")
+
+        # Initialize the agent
+        if not self.initialize():
+            self.console.print("[red]Failed to initialize. Please check your setup.[/red]")
+            return
+
+        try:
+            while True:
+                # Get user question
+                question = Prompt.ask("\n[bold cyan]Your question[/bold cyan]").strip()
+                
+                if not question:
+                    continue
+                    
+                if question.lower() in ['quit', 'exit', 'q']:
+                    self.console.print("[dim]Goodbye! 🙏[/dim]")
+                    break
+                
+                # Get agent response
+                try:
+                    response = self.agent_response(question)
+                    
+                    # Display response
+                    self.console.print("\n" + "="*60)
+                    self.console.print(Panel(
+                        Markdown(response),
+                        title="🤖 Sacred Texts Agent Response",
+                        border_style="green"
+                    ))
+                    
+                    # Add to chat history
+                    self.chat_history.append({"role": "user", "content": question})
+                    self.chat_history.append({"role": "assistant", "content": response})
+                    
+                except KeyboardInterrupt:
+                    self.console.print("\n[yellow]Response generation interrupted.[/yellow]")
+                    continue
+                except Exception as e:
+                    self.console.print(f"\n[red]Error generating response: {e}[/red]")
+                    continue
+                    
+        except KeyboardInterrupt:
+            self.console.print("\n[dim]Goodbye! 🙏[/dim]")
+
     def agent_response(self, question: str) -> str:
         """
         Main agentic response loop:
