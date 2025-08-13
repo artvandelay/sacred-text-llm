@@ -70,3 +70,4 @@ embeddings/
 vector_db/
 processed_texts/
 chunks/
+data/vector_db/
