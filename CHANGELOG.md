@@ -1,5 +1,32 @@
 # Changelog
 
+## [v2.1.0] - Adaptive Intelligence Architecture - 2024-12-28
+
+### 🧠 Revolutionary Intelligence
+
+#### **Adaptive Research Strategy**
+- **Question Type Detection**: Agent intelligently classifies questions as simple_factual, follow_up_clarification, moderate_research, or deep_research
+- **Dynamic Query Generation**: 1-3 queries for simple questions, 5-20 queries for complex research (no more forced limits)
+- **Conditional Processing**: Skips unnecessary synthesis steps for simple factual questions
+- **Strategy-Based Termination**: Simple questions terminate after 1 iteration with direct answers
+
+#### **Performance Improvements**  
+- **Faster Simple Answers**: "how many pandavas" → 3 queries, 31s duration (vs 20 queries, 90s+ previously)
+- **Context Preservation**: Follow-up questions maintain conversation context ("who is their mother" understands Pandava context)
+- **Intelligent Adaptation**: Complex philosophical questions still get full 20-query treatment when needed
+
+#### **User Experience**
+- **Natural Conversation Flow**: Follow-up clarifications work properly with maintained context
+- **Appropriate Response Depth**: Simple questions get direct answers, complex ones get scholarly analysis
+- **Efficient Resource Usage**: No more over-engineering simple requests
+
+### 🔧 Technical Architecture
+- **Upper Limits Philosophy**: Set maximum capabilities (20 queries) but let intelligence decide what's needed
+- **Flexible Pipeline**: Each step (query generation, synthesis, reflection) adapts to question complexity
+- **Smart Defaults**: Conservative fallbacks ensure system reliability while maximizing intelligence
+
+---
+
 ## [v2.0.0] - Enhanced Deep Research Agent - 2024-12-28
 
 ### 🚀 Major Features
