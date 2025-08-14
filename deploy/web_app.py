@@ -96,6 +96,8 @@ class WebProgressUI(SimpleProgressUI):
     """Web-compatible progress UI that streams updates"""
     
     def __init__(self, web_console: WebConsole):
+        # Initialize parent class with the web console
+        super().__init__(web_console)
         self.web_console = web_console
         
     def start_session(self, question: str):
