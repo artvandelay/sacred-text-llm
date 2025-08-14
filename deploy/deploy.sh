@@ -128,17 +128,43 @@ start_web_server() {
     echo $WEB_PID > .web_server.pid
 }
 
+# Function to setup ngrok authentication
+setup_ngrok() {
+    print_status "Setting up ngrok authentication..."
+    
+    # Load environment variables from .env file
+    if [ -f .env ]; then
+        export $(grep -v '^#' .env | xargs)
+    fi
+    
+    # Check if ngrok token is provided
+    if [ -z "$NGROK_AUTHTOKEN" ] || [ "$NGROK_AUTHTOKEN" = "YOUR_NGROK_TOKEN_HERE" ] || [ "$NGROK_AUTHTOKEN" = "your-ngrok-token-here" ]; then
+        print_error "ngrok authtoken not configured in .env file"
+        echo ""
+        echo "To get your ngrok token:"
+        echo "1. Sign up at: https://ngrok.com/"
+        echo "2. Get your token from: https://dashboard.ngrok.com/get-started/your-authtoken"
+        echo "3. Add it to your .env file: NGROK_AUTHTOKEN=your-token-here"
+        echo ""
+        exit 1
+    fi
+    
+    # Authenticate ngrok
+    ngrok authtoken "$NGROK_AUTHTOKEN" >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        print_success "ngrok authenticated successfully"
+    else
+        print_error "Failed to authenticate ngrok"
+        exit 1
+    fi
+}
+
 # Function to start ngrok tunnel
 start_ngrok() {
     print_status "Starting ngrok tunnel..."
     
-    # Check if ngrok is authenticated
-    if [ ! -f ~/.ngrok2/ngrok.yml ]; then
-        print_warning "ngrok not authenticated. Please run:"
-        print_warning "  ngrok authtoken YOUR_TOKEN"
-        print_warning "Get your token from: https://dashboard.ngrok.com/get-started/your-authtoken"
-        exit 1
-    fi
+    # Setup ngrok authentication
+    setup_ngrok
     
     # Start ngrok tunnel
     ngrok http $WEB_PORT --region $NGROK_REGION > .ngrok.log 2>&1 &
@@ -266,6 +292,19 @@ trap cleanup EXIT
 # Main deployment function
 deploy() {
     print_status "Starting Sacred Texts LLM deployment..."
+    
+    # Load environment variables from .env file
+    if [ -f .env ]; then
+        export $(grep -v '^#' .env | xargs)
+        print_success "Loaded environment variables from .env"
+    else
+        print_warning "No .env file found. Creating from template..."
+        if [ -f deploy/env.phase2.example ]; then
+            cp deploy/env.phase2.example .env
+            print_warning "Created .env from Phase 2 template. Please configure your tokens."
+            exit 1
+        fi
+    fi
     
     check_dependencies
     install_dependencies
