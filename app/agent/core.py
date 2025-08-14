@@ -120,7 +120,7 @@ class SacredTextsAgent:
         return results
 
     def generate_research_queries(self, state: AgentState, accumulated_insights: List[str] = None) -> Dict[str, Any]:
-        """Generate diverse research queries for deep investigation"""
+        """Intelligently determine research strategy and generate appropriate queries"""
         current_evidence = state.get_evidence_summary()
         search_history = state.get_search_history()
         
@@ -132,19 +132,11 @@ class SacredTextsAgent:
 ACCUMULATED INSIGHTS FROM PREVIOUS RESEARCH:
 {insights_text}
 
-Based on these insights, generate queries that:
-1. Explore concepts, terms, or perspectives mentioned but not fully explained
-2. Seek deeper understanding or different viewpoints 
-3. Look for practical applications or examples
-4. Investigate related traditions or complementary teachings
+Based on these insights, determine what additional research (if any) is needed.
 """
         else:
             context_section = """
-This is the initial research phase. Generate diverse queries that:
-1. Explore different aspects and dimensions of the question
-2. Look for various traditions and perspectives
-3. Seek both theoretical understanding and practical applications
-4. Consider historical, mystical, and philosophical angles
+This is the initial research phase. Assess what type and depth of research this question requires.
 """
 
         # Include recent chat history for context (especially important for follow-up questions)
@@ -174,27 +166,32 @@ PREVIOUS SEARCH QUERIES:
 
 {context_section}
 
-Your task: 
+Your task: INTELLIGENTLY determine the appropriate research strategy for this question.
 
-IMPORTANT: If this appears to be a follow-up question that clarifies or refines the previous question, focus your queries on that specific clarification rather than starting completely fresh research.
+QUESTION ANALYSIS:
+First, assess what type of question this is:
+- Simple factual question (names, dates, basic facts) → Needs 1-3 targeted queries
+- Follow-up clarification → Needs 1-5 focused queries  
+- Complex philosophical/theological → Needs 5-20 comprehensive queries
+- Synthesis/comparison across traditions → Needs 10-20 diverse queries
 
-Generate {config.MAX_QUERIES_PER_ITERATION} diverse, specific research queries that will provide comprehensive coverage of the topic. Each query should:
-
-- Be specific enough to retrieve relevant passages
-- If this is a follow-up question, directly address the clarification requested
-- Explore different angles, traditions, or concepts relevant to the current question
-- Build upon or complement previous research when appropriate
-- Use varied terminology (synonyms, traditional terms, modern concepts)
+ADAPTIVE RESEARCH STRATEGY:
+Based on your analysis, choose the appropriate number of queries (1 to {config.MAX_QUERIES_PER_ITERATION}):
+- Don't default to maximum queries unless the question truly requires deep research
+- For simple questions, use minimal targeted queries
+- For complex questions, use comprehensive research
+- Let the question complexity drive the strategy, not arbitrary limits
 
 Respond in JSON format:
 {{
-    "reasoning": "Your strategic thinking about what areas need investigation and why these specific queries will advance understanding",
-    "search_queries": ["query1", "query2", "query3", "query4", "query5"],
-    "research_focus": "What these searches collectively aim to accomplish",
-    "expected_insights": "What types of insights or understanding you expect these queries to reveal"
+    "reasoning": "Your assessment of question type and why you chose this research strategy",
+    "research_strategy": "simple_factual|follow_up_clarification|moderate_research|deep_research", 
+    "search_queries": ["query1", "query2", ...],
+    "research_focus": "What these searches aim to accomplish",
+    "expected_insights": "What you expect to find and how it answers the question"
 }}
 
-Generate exactly {config.MAX_QUERIES_PER_ITERATION} diverse search queries.
+Generate the APPROPRIATE number of queries for this specific question (1-{config.MAX_QUERIES_PER_ITERATION}).
 """
         try:
             response = self.llm_provider.generate_response(
@@ -563,6 +560,7 @@ Generate a comprehensive response that draws wisdom from the sacred texts provid
         accumulated_insights = []  # Track insights across iterations
         reflection = None  # Initialize reflection for use after loop
         depth_assessment = "moderate"  # Initialize depth assessment
+        query_plan = {}  # Initialize query plan for use after loop
         
         # Start progress tracking
         self.progress_ui.start_session(question)
@@ -613,18 +611,25 @@ Generate a comprehensive response that draws wisdom from the sacred texts provid
                     [f"Query: {r.query} → {len(r.documents)} results" for r in search_results],
                 )
 
-                # === BATCH SUMMARIZATION ===
+                # === ADAPTIVE BATCH SUMMARIZATION ===
                 state.set_step(AgentStep.REFLECTING)
-                self.progress_ui.update_step(AgentStep.REFLECTING, "Synthesizing retrieved passages")
+                research_strategy = query_plan.get("research_strategy", "moderate_research")
                 
-                # Synthesize all search results from this iteration into coherent insights
-                iteration_insight = self.summarize_search_batch(search_results, question)
-                accumulated_insights.append(iteration_insight)
-                
-                # Show detailed insight synthesis
-                if config.SHOW_DETAILED_PROGRESS:
-                    insight_preview = iteration_insight[:200] + "..." if len(iteration_insight) > 200 else iteration_insight
-                    self.progress_ui.show_insight_synthesis(iteration, search_results, insight_preview)
+                # Only do detailed synthesis for complex research, simple questions skip this
+                if research_strategy in ["deep_research", "moderate_research"]:
+                    self.progress_ui.update_step(AgentStep.REFLECTING, "Synthesizing retrieved passages")
+                    iteration_insight = self.summarize_search_batch(search_results, question)
+                    accumulated_insights.append(iteration_insight)
+                    
+                    # Show detailed insight synthesis
+                    if config.SHOW_DETAILED_PROGRESS:
+                        insight_preview = iteration_insight[:200] + "..." if len(iteration_insight) > 200 else iteration_insight
+                        self.progress_ui.show_insight_synthesis(iteration, search_results, insight_preview)
+                else:
+                    # For simple questions, just collect the evidence directly
+                    self.progress_ui.update_step(AgentStep.REFLECTING, "Reviewing retrieved passages")
+                    simple_insight = f"Retrieved {len(search_results)} targeted results for: {question}"
+                    accumulated_insights.append(simple_insight)
 
                 # === ENHANCED REFLECTION ===
                 self.progress_ui.update_step(AgentStep.REFLECTING, "Assessing research depth and completeness")
@@ -648,8 +653,15 @@ Generate a comprehensive response that draws wisdom from the sacred texts provid
                     ],
                 )
 
-                # === TERMINATION DECISION ===
-                # Agent decides when it has achieved sufficient depth
+                # === ADAPTIVE TERMINATION DECISION ===
+                # Strategy-based termination logic
+                if research_strategy in ["simple_factual", "follow_up_clarification"]:
+                    # Simple questions should terminate after first iteration if we got results
+                    if search_results and any(result.documents for result in search_results):
+                        self.console.print(f"[green]✓ Simple question answered after {iteration + 1} iterations[/green]")
+                        break
+                
+                # Standard termination logic for complex questions
                 needs_more_research = reflection.get("needs_more_research", True)
                 termination_confidence = reflection.get("termination_confidence", 0.5)
                 
@@ -669,12 +681,20 @@ Generate a comprehensive response that draws wisdom from the sacred texts provid
                 if iteration < config.MAX_RESEARCH_ITERATIONS - 1:
                     self.console.print(f"[blue]→ Continuing to iteration {iteration + 2}[/blue]")
 
-            # === FINAL RESPONSE GENERATION ===
+            # === ADAPTIVE FINAL RESPONSE GENERATION ===
             state.set_step(AgentStep.GENERATING)
-            self.progress_ui.update_step(AgentStep.GENERATING, "Generating comprehensive response from research")
             
-            # Use accumulated insights for final response
-            final_response = self.generate_final_response_from_insights(state, accumulated_insights)
+            # Choose response style based on research strategy used in first iteration
+            first_strategy = query_plan.get("research_strategy", "moderate_research")
+            
+            if first_strategy in ["simple_factual", "follow_up_clarification"]:
+                self.progress_ui.update_step(AgentStep.GENERATING, "Generating direct answer")
+                # Use simpler response generation for simple questions
+                final_response = self.generate_final_response(state)
+            else:
+                self.progress_ui.update_step(AgentStep.GENERATING, "Generating comprehensive response from research")
+                # Use insights-based response for complex questions
+                final_response = self.generate_final_response_from_insights(state, accumulated_insights)
             
             state.complete(final_response, "research_complete", reflection.get("confidence", 0.8) if reflection else 0.8)
             
