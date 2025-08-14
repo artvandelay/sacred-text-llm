@@ -66,11 +66,11 @@ setup_environment() {
     print_status "Setting up environment configuration..."
     
     if [ ! -f .env ]; then
-        if [ -f env.example ]; then
-            cp env.example .env
+        if [ -f deploy/env.example ]; then
+            cp deploy/env.example .env
             print_success "Created .env file from template"
         else
-            print_error "env.example not found. Please create .env file manually."
+            print_error "deploy/env.example not found. Please create .env file manually."
             exit 1
         fi
     else
@@ -206,7 +206,7 @@ test_setup() {
     
     # Test web app startup
     print_status "Testing web app startup..."
-    timeout 10s python3 web_app.py &
+    timeout 10s python3 deploy/web_app.py &
     WEB_PID=$!
     sleep 3
     
@@ -238,17 +238,16 @@ show_next_steps() {
     echo "   Public: URL will be shown by ngrok"
     echo ""
     echo "3. 🧪 Test the setup:"
-    echo "   python test_web.py"
+    echo "   python deploy/test_web.py"
     echo ""
     echo "4. 📚 Use the CLI (unchanged):"
     echo "   python chat.py          # Simple chat"
     echo "   python agent_chat.py    # Deep research"
     echo ""
     echo "5. 🔄 Switch to OpenRouter (Phase 2):"
-    echo "   Edit .env file: LLM_PROVIDER=openrouter"
-    echo "   Add your API key: OPENROUTER_API_KEY=your-key"
+    echo "   ./deploy/setup_phase2.sh"
     echo ""
-    echo "For help: ./deploy.sh help"
+    echo "For help: ./deploy/deploy.sh help"
     echo ""
 }
 

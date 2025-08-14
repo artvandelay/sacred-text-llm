@@ -403,7 +403,7 @@ async def get_info():
         "current_provider": agent_config.LLM_PROVIDER,
         "chat_model": agent_config.OLLAMA_CHAT_MODEL if agent_config.LLM_PROVIDER == "ollama" else agent_config.OPENROUTER_CHAT_MODEL,
         "available_providers": ["ollama", "openrouter"],
-        "phase": "Phase 1 - Local Ollama + ngrok exposure"
+        "phase": "Phase 2 - Local ChromaDB + Cloud OpenRouter" if agent_config.LLM_PROVIDER == "openrouter" else "Phase 1 - Local Ollama + ngrok exposure"
     }
 
 

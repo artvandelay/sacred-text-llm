@@ -112,7 +112,7 @@ start_web_server() {
     kill_port $WEB_PORT
     
     # Start the web server in background
-    python3 web_app.py &
+    python3 deploy/web_app.py &
     WEB_PID=$!
     
     # Wait a moment for server to start
