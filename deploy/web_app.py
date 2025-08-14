@@ -274,8 +274,18 @@ async def root():
                         })
                     });
                     
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
                     const result = await response.json();
-                    document.getElementById('output').innerHTML += '\\n<span class="response">' + result.response + '</span>';
+                    if (result.response) {
+                        document.getElementById('output').innerHTML += '\\n<span class="response">' + result.response + '</span>';
+                    } else if (result.detail) {
+                        document.getElementById('output').innerHTML += '\\n<span class="error">Error: ' + JSON.stringify(result.detail) + '</span>';
+                    } else {
+                        document.getElementById('output').innerHTML += '\\n<span class="error">Unexpected response format: ' + JSON.stringify(result) + '</span>';
+                    }
                 } catch (error) {
                     document.getElementById('output').innerHTML += '\\n<span class="error">Error: ' + error.message + '</span>';
                 } finally {
