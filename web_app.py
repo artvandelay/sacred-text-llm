@@ -166,6 +166,9 @@ async def root():
             .mode-btn { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
             .mode-btn.active { background: #4CAF50; color: white; }
             .mode-btn.inactive { background: #666; color: #ccc; }
+            .provider-info { margin-bottom: 15px; padding: 10px; background: #2a2a2a; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+            .provider-status { font-size: 14px; color: #4CAF50; }
+            .refresh-btn { background: none; border: none; color: #4CAF50; cursor: pointer; font-size: 16px; }
             .input-area { margin-bottom: 20px; }
             #query { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #444; background: #2a2a2a; color: #fff; }
             #submit { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
@@ -178,6 +181,11 @@ async def root():
     <body>
         <div class="container">
             <h1>🕉️ Sacred Texts LLM</h1>
+            
+            <div class="provider-info">
+                <span id="provider-status">Loading...</span>
+                <button onclick="refreshProviderInfo()" class="refresh-btn">🔄</button>
+            </div>
             
             <div class="mode-selector">
                 <button class="mode-btn active" onclick="setMode('chat')">💬 Simple Chat</button>
@@ -196,6 +204,26 @@ async def root():
         <script>
             let currentMode = 'chat';
             let ws = null;
+            
+            // Load provider info on page load
+            window.onload = function() {
+                refreshProviderInfo();
+            };
+            
+            async function refreshProviderInfo() {
+                try {
+                    const response = await fetch('/info');
+                    const data = await response.json();
+                    const statusElement = document.getElementById('provider-status');
+                    statusElement.innerHTML = `
+                        <strong>Provider:</strong> ${data.current_provider.toUpperCase()} 
+                        <strong>Model:</strong> ${data.chat_model}
+                        <strong>Phase:</strong> ${data.phase}
+                    `;
+                } catch (error) {
+                    document.getElementById('provider-status').innerHTML = 'Error loading provider info';
+                }
+            }
             
             function setMode(mode) {
                 currentMode = mode;
@@ -363,11 +391,19 @@ async def health_check():
 @app.get("/info")
 async def get_info():
     """Get system information"""
+    # Get current provider info
+    from app.agent import config as agent_config
+    from app.chat import config as chat_config
+    
     return {
         "name": "Sacred Texts LLM",
         "version": "1.0.0",
         "modes": ["chat", "agent"],
-        "description": "Dual-mode sacred texts interface with simple chat and deep research capabilities"
+        "description": "Dual-mode sacred texts interface with simple chat and deep research capabilities",
+        "current_provider": agent_config.LLM_PROVIDER,
+        "chat_model": agent_config.OLLAMA_CHAT_MODEL if agent_config.LLM_PROVIDER == "ollama" else agent_config.OPENROUTER_CHAT_MODEL,
+        "available_providers": ["ollama", "openrouter"],
+        "phase": "Phase 1 - Local Ollama + ngrok exposure"
     }
 
 
