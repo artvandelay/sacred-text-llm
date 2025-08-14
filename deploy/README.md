@@ -2,28 +2,19 @@
 
 ## Overview
 
-This folder contains everything needed to deploy your Sacred Texts LLM application. The system supports two deployment phases:
+This folder contains everything needed to deploy your Sacred Texts LLM application using a hybrid architecture:
 
-- **Phase 1**: Local Ollama + ngrok exposure (cost-free, local processing)
-- **Phase 2**: Hybrid setup with OpenRouter cloud LLM (better quality, pay-per-use)
+- **Local ChromaDB**: Keeps your sacred texts data private and fast
+- **Cloud OpenRouter**: Uses best-in-class LLMs (Claude, GPT-4) for superior responses
+- **ngrok Integration**: Public HTTPS access for sharing and testing
 
 ## Quick Start
 
-### Phase 1: Local Deployment (Recommended for Beta Testing)
 ```bash
-# Setup Phase 1 (Local Ollama)
-./deploy/setup_phase1.sh
+# Setup deployment environment
+./deploy/setup.sh
 
-# Deploy
-./deploy/deploy.sh
-```
-
-### Phase 2: Hybrid Deployment (Recommended for Production)
-```bash
-# Setup Phase 2 (OpenRouter + Local ChromaDB)
-./deploy/setup_phase2.sh
-
-# Deploy
+# Deploy with public access
 ./deploy/deploy.sh
 ```
 
@@ -33,31 +24,22 @@ This folder contains everything needed to deploy your Sacred Texts LLM applicati
 deploy/
 ├── README.md                 # This file
 ├── deploy.sh                 # Main deployment script
-├── setup_phase1.sh          # Phase 1 setup (Ollama)
-├── setup_phase2.sh          # Phase 2 setup (OpenRouter)
+├── setup.sh                 # Environment setup script
 ├── web_app.py               # FastAPI web wrapper
 ├── test_web.py              # Web interface testing
-├── env.example              # Phase 1 environment template
-├── env.phase2.example       # Phase 2 environment template
-├── PHASE1_GUIDE.md          # Detailed Phase 1 guide
-└── PHASE2_GUIDE.md          # Detailed Phase 2 guide
+├── env.example              # Environment configuration template
+└── PHASE2_GUIDE.md          # Detailed deployment guide
 ```
 
-## Deployment Phases
+## Architecture
 
-### Phase 1: Local Ollama
-- **LLM**: Local Ollama (qwen3:30b-a3b)
-- **Database**: Local ChromaDB
-- **Cost**: $0 (completely free)
-- **Quality**: Good
-- **Use case**: Beta testing, development
-
-### Phase 2: Hybrid OpenRouter
-- **LLM**: Cloud OpenRouter (Claude 3.5 Sonnet)
-- **Database**: Local ChromaDB (data privacy)
+### Hybrid Deployment
+- **LLM**: Cloud OpenRouter (Claude 3.5 Sonnet, GPT-4)
+- **Database**: Local ChromaDB (sacred texts stay private)
+- **Fallback**: Local Ollama (if OpenRouter fails)
 - **Cost**: ~$0.01-0.50 per query
 - **Quality**: Excellent
-- **Use case**: Production, user testing
+- **Use case**: Production-ready with reliability
 
 ## Commands
 

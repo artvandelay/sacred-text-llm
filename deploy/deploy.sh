@@ -1,8 +1,6 @@
 #!/bin/bash
-"""
-Continuous Deployment Script for Sacred Texts LLM
-Handles local development, ngrok exposure, and deployment updates
-"""
+# Sacred Texts LLM - Deployment Script
+# Phase 2: Hybrid deployment with OpenRouter + Local ChromaDB
 
 set -e  # Exit on any error
 
@@ -299,9 +297,9 @@ deploy() {
         print_success "Loaded environment variables from .env"
     else
         print_warning "No .env file found. Creating from template..."
-        if [ -f deploy/env.phase2.example ]; then
-            cp deploy/env.phase2.example .env
-            print_warning "Created .env from Phase 2 template. Please configure your tokens."
+        if [ -f deploy/env.example ]; then
+            cp deploy/env.example .env
+            print_warning "Created .env from template. Please configure your tokens."
             exit 1
         fi
     fi

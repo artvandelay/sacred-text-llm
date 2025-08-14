@@ -1,6 +1,6 @@
 #!/bin/bash
-# Phase 2 Setup Script for Sacred Texts LLM
-# Sets up hybrid deployment: Local ChromaDB + Cloud OpenRouter LLM
+# Sacred Texts LLM Setup Script
+# Hybrid deployment: Local ChromaDB + Cloud OpenRouter LLM
 
 set -e  # Exit on any error
 
@@ -62,29 +62,29 @@ print_header() {
 }
 
 setup_environment() {
-    print_status "Setting up Phase 2 environment configuration..."
+    print_status "Setting up environment configuration..."
     
     if [ ! -f .env ]; then
-        if [ -f deploy/env.phase2.example ]; then
-            cp deploy/env.phase2.example .env
-            print_success "Created .env file from Phase 2 template"
+        if [ -f deploy/env.example ]; then
+            cp deploy/env.example .env
+            print_success "Created .env file from template"
         else
-            print_error "env.phase2.example not found. Please create .env file manually."
+            print_error "deploy/env.example not found. Please create .env file manually."
             exit 1
         fi
     else
         print_warning ".env file already exists"
-        read -p "Do you want to update it for Phase 2? (y/N): " -n 1 -r
+        read -p "Do you want to update it with the latest template? (y/N): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            cp deploy/env.phase2.example .env
-            print_success "Updated .env file for Phase 2"
+            cp deploy/env.example .env
+            print_success "Updated .env file with latest template"
         fi
     fi
     
-    # Ensure Phase 2 settings
+    # Ensure OpenRouter is set as provider
     sed -i.bak 's/LLM_PROVIDER=.*/LLM_PROVIDER=openrouter/' .env
-    print_success "Configured for Phase 2 (OpenRouter)"
+    print_success "Configured for OpenRouter provider"
 }
 
 check_dependencies() {
@@ -209,8 +209,31 @@ setup_ollama_fallback() {
 setup_ngrok() {
     print_status "Setting up ngrok..."
     
-    # Check if ngrok is authenticated
-    if [ ! -f ~/.ngrok2/ngrok.yml ]; then
+    # Check if ngrok is authenticated (multiple possible config locations)
+    NGROK_CONFIG_FOUND=false
+    
+    # Check modern ngrok config location
+    if [ -f "$HOME/Library/Application Support/ngrok/ngrok.yml" ]; then
+        NGROK_CONFIG_FOUND=true
+    # Check legacy location
+    elif [ -f ~/.ngrok2/ngrok.yml ]; then
+        NGROK_CONFIG_FOUND=true
+    fi
+    
+    if [ "$NGROK_CONFIG_FOUND" = false ]; then
+        # Try to authenticate using token from .env if available
+        if [ -f .env ]; then
+            export $(grep -v '^#' .env | xargs)
+            if [ -n "$NGROK_AUTHTOKEN" ] && [ "$NGROK_AUTHTOKEN" != "YOUR_NGROK_TOKEN_HERE" ] && [ "$NGROK_AUTHTOKEN" != "your-ngrok-token-here" ]; then
+                print_status "Authenticating ngrok using token from .env..."
+                ngrok config add-authtoken "$NGROK_AUTHTOKEN" >/dev/null 2>&1
+                if [ $? -eq 0 ]; then
+                    print_success "ngrok authenticated successfully"
+                    return 0
+                fi
+            fi
+        fi
+        
         print_warning "ngrok not authenticated. Please run:"
         print_warning "  ngrok authtoken YOUR_TOKEN"
         print_warning "Get your token from: https://dashboard.ngrok.com/get-started/your-authtoken"
@@ -218,7 +241,7 @@ setup_ngrok() {
         exit 1
     fi
     
-    print_success "ngrok is configured"
+    print_success "ngrok is authenticated and ready"
 }
 
 install_python_deps() {

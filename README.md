@@ -49,13 +49,7 @@ This collection contains humanity's most treasured spiritual works:
 - **📱 Multiple Interfaces**: Chat UI, command line, or integrate via API
 - **⚡ Fast & Accurate**: Optimized chunking and retrieval for spiritual content
 
-**Status**: Phase 1 complete ✅ | Phase 2 in progress 🚧 | Chat interface ready ✅
-
-> **⚠️ FOR OTHER AI AGENTS**: 
-> - Ingestion is CURRENTLY RUNNING (PID 3170) - DO NOT INTERRUPT
-> - Vector store has 212,611 docs ready, chat interface works
-> - ~30 minutes remaining for full ingestion 
-> - Use `tail -f ingest.log` to monitor progress
+**Status**: Phase 1 complete ✅ | Phase 2 deployed ✅ | Web deployment ready ✅ | Vector store complete ✅
 
 ## Quick Start
 
@@ -64,68 +58,67 @@ This collection contains humanity's most treasured spiritual works:
 python data/download_sacred_texts.py
 ```
 
-### 2. Ingest to Vector Database (if not done)
+### 2. Deploy the Application
+
+#### **🚀 Quick Deploy (Recommended)**
 ```bash
-python data/ingest.py --sources sacred_texts_archive/extracted --mode fast --embed-workers 1 --db-batch-size 128
+# Setup deployment environment
+./deploy/setup.sh
+
+# Deploy with public access
+./deploy/deploy.sh
 ```
-**Status**: ✅ COMPLETE - 363,461 documents indexed and ready
 
-### 3. Query the Sacred Texts
+#### **💬 Command Line Interface**
 ```bash
-# Simple query (single-shot retrieval)
-python query.py "What is the meaning of compassion?"
-
-# Interactive chat (enhanced interface)
+# Simple chat interface
 python chat.py
 
-# 🤖 Agentic chat (advanced iterative agent)
+# Advanced agentic research interface  
 python agent_chat.py
+
+# Single query
+python query.py "What is the meaning of compassion?"
 ```
 
-⚠️ **Important**: Ingestion is still running. The chat interface works with current data (212K+ docs) but will have complete coverage once ingestion finishes.
+### 3. Web Interface
+After deployment, access your Sacred Texts LLM via:
+- **Local**: http://localhost:8001
+- **Public**: Your unique ngrok URL (shown during deployment)
 
-## LLM Provider Options
+## Hybrid Architecture
 
-The system supports **modular LLM providers** - same interface, different backends:
+The system uses a **hybrid approach** combining the best of local and cloud:
 
-### **Phase 1: Local Ollama (Current)**
-```python
-# config.py
-LLM_PROVIDER = "ollama"  # Uses your local models
-```
-
-**Benefits:**
-- ✅ Free - no API costs
-- ✅ Private - data never leaves your machine  
-- ✅ Fast - no network calls for chat generation
-
-### **Phase 2: OpenRouter APIs (Better Quality)**
-```python
-# config.py  
-LLM_PROVIDER = "openrouter"  # Uses GPT-4, Claude, etc.
-```
-
+### **Primary: OpenRouter Cloud LLMs**
 ```bash
-# Set your API key
-export OPENROUTER_API_KEY="your-key-here"
-
-# Run the same interface
-python chat.py
+# Configured in .env file
+LLM_PROVIDER=openrouter
+OPENROUTER_API_KEY=your-key-here
+OPENROUTER_CHAT_MODEL=anthropic/claude-3.5-sonnet
 ```
 
 **Benefits:**
-- 🚀 Better response quality (GPT-4, Claude)
-- 💰 Low cost (~$0.01-0.10 per question)
-- 🔄 Same interface - just better answers
+- 🚀 **Superior Quality**: GPT-4, Claude 3.5 Sonnet responses
+- 💰 **Cost Effective**: ~$0.01-0.10 per question
+- 🔄 **Latest Models**: Always access to newest LLMs
 
-### **Easy Switching**
-Change one line in `config.py` to switch providers:
-```python
-LLM_PROVIDER = "ollama"      # Local models
-LLM_PROVIDER = "openrouter"  # Cloud models
+### **Fallback: Local Ollama**
+```bash
+# Automatic fallback if OpenRouter fails
+OLLAMA_CHAT_MODEL=qwen3:30b-a3b
+ENABLE_OLLAMA_FALLBACK=true
 ```
 
-**The beauty:** Same chat interface, same vector search (local ChromaDB), easy A/B testing!
+**Benefits:**
+- ✅ **Reliability**: Never fails completely
+- ✅ **Privacy**: Local processing when needed
+- ✅ **No Dependency**: Works offline
+
+### **Data Privacy**
+- 📚 **Sacred texts**: Always stored locally (ChromaDB)
+- 🔒 **Queries only**: Only your questions go to OpenRouter
+- 🏠 **Full control**: Switch to local-only anytime
 
 ## 🤖 **Agentic Chat Interface**
 
