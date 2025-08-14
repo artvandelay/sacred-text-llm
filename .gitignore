@@ -30,10 +30,16 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Environment variables
+# Environment variables - NEVER commit these!
 .env
+.env.*
 .env.local
 .env.*.local
+.env.backup
+.env.bak
+.env.old
+.env.copy
+*.env
 
 # Logs
 logs/
