@@ -4,6 +4,11 @@ Web wrapper for Sacred Texts LLM - preserves rich console experience
 Enables continuous deployment while maintaining CLI development workflow
 """
 
+import sys
+import os
+# Add the parent directory to Python path so we can import from app/
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import asyncio
 import json
 import time

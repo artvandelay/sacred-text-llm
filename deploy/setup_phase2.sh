@@ -1,8 +1,6 @@
 #!/bin/bash
-"""
-Phase 2 Setup Script for Sacred Texts LLM
-Sets up hybrid deployment: Local ChromaDB + Cloud OpenRouter LLM
-"""
+# Phase 2 Setup Script for Sacred Texts LLM
+# Sets up hybrid deployment: Local ChromaDB + Cloud OpenRouter LLM
 
 set -e  # Exit on any error
 
@@ -46,10 +44,11 @@ check_openrouter_key() {
         -H "Content-Type: application/json" \
         "https://openrouter.ai/api/v1/models" 2>/dev/null)
     
-    if echo "$response" | grep -q "error"; then
-        return 1
-    else
+    # Check if response contains models (success) or error (failure)
+    if echo "$response" | grep -q '"id":' && ! echo "$response" | grep -q '"error"'; then
         return 0
+    else
+        return 1
     fi
 }
 
@@ -122,7 +121,7 @@ setup_openrouter() {
     
     # Load API key from .env
     if [ -f .env ]; then
-        source .env
+        export $(grep -v '^#' .env | xargs)
     fi
     
     # Check if API key is set
@@ -246,7 +245,7 @@ test_setup() {
     
     # Test OpenRouter connection
     if [ -f .env ]; then
-        source .env
+        export $(grep -v '^#' .env | xargs)
         if check_openrouter_key "$OPENROUTER_API_KEY"; then
             print_success "✓ OpenRouter connection test passed"
         else
