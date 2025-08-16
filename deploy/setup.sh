@@ -55,7 +55,7 @@ check_openrouter_key() {
 print_header() {
     echo ""
     echo "🚀 ========================================="
-    echo "   Sacred Texts LLM - Phase 2 Setup"
+    echo "   Sacred Texts LLM - Setup"
     echo "   Local ChromaDB + Cloud OpenRouter"
     echo "========================================="
     echo ""
@@ -138,7 +138,7 @@ setup_openrouter() {
             sed -i.bak "s/OPENROUTER_API_KEY=.*/OPENROUTER_API_KEY=$api_key/" .env
             OPENROUTER_API_KEY=$api_key
         else
-            print_error "API key is required for Phase 2"
+            print_error "API key is required for OpenRouter"
             exit 1
         fi
     fi
@@ -264,7 +264,7 @@ check_vector_store() {
 }
 
 test_setup() {
-    print_status "Testing Phase 2 setup..."
+    print_status "Testing deployment setup..."
     
     # Test OpenRouter connection
     if [ -f .env ]; then
@@ -306,7 +306,7 @@ test_setup() {
 show_next_steps() {
     echo ""
     echo "🎉 ========================================="
-    echo "   Phase 2 Setup Complete!"
+    echo "   Setup Complete!"
     echo "========================================="
     echo ""
     echo "Next steps:"
@@ -328,7 +328,7 @@ show_next_steps() {
     echo "5. 💰 Monitor costs:"
     echo "   Check your OpenRouter dashboard: https://openrouter.ai/keys"
     echo ""
-    echo "6. 🔄 Switch back to Phase 1 (Ollama):"
+    echo "6. 🔄 Switch back to local processing (Ollama):"
     echo "   Edit .env file: LLM_PROVIDER=ollama"
     echo "   ./deploy/deploy.sh restart"
     echo ""
@@ -375,12 +375,12 @@ case "${1:-setup}" in
         fi
         ;;
     "help"|"-h"|"--help")
-        echo "Sacred Texts LLM - Phase 2 Setup Script"
+        echo "Sacred Texts LLM - Setup Script"
         echo ""
         echo "Usage: $0 [command]"
         echo ""
         echo "Commands:"
-        echo "  setup, start  - Complete Phase 2 setup (default)"
+        echo "  setup, start  - Complete deployment setup (default)"
         echo "  check         - Check if setup is complete"
         echo "  help          - Show this help message"
         echo ""
@@ -393,7 +393,7 @@ case "${1:-setup}" in
         echo "  - Vector store verification"
         echo "  - Web app testing"
         echo ""
-        echo "Phase 2 features:"
+        echo "Deployment features:"
         echo "  - Cloud LLM (OpenRouter) for better quality"
         echo "  - Local ChromaDB for data privacy"
         echo "  - Ollama fallback for reliability"

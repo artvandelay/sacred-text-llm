@@ -1,5 +1,5 @@
 # Sacred Texts LLM - Production Dependencies
-# Supports Phase 1 (Local Ollama) and Phase 2 (Hybrid OpenRouter) deployments
+# Hybrid deployment: Local ChromaDB + Cloud OpenRouter with Ollama fallback
 
 # Core RAG Implementation
 chromadb>=0.5.4

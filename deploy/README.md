@@ -45,15 +45,11 @@ deploy/
 
 ### Setup Commands
 ```bash
-# Phase 1 setup
-./deploy/setup_phase1.sh
+# Setup deployment environment
+./deploy/setup.sh
 
-# Phase 2 setup
-./deploy/setup_phase2.sh
-
-# Check setup
-./deploy/setup_phase1.sh check
-./deploy/setup_phase2.sh check
+# Check setup status
+./deploy/setup.sh check
 ```
 
 ### Deployment Commands
@@ -90,20 +86,19 @@ python agent_chat.py
 ## Configuration
 
 ### Environment Files
-- **`env.example`**: Phase 1 configuration (Ollama)
-- **`env.phase2.example`**: Phase 2 configuration (OpenRouter)
+- **`env.example`**: Hybrid deployment configuration template
 
 ### Key Settings
 ```bash
 # LLM Provider
-LLM_PROVIDER=ollama        # Phase 1
-LLM_PROVIDER=openrouter    # Phase 2
+LLM_PROVIDER=ollama        # Local processing
+LLM_PROVIDER=openrouter    # Cloud processing
 
 # Models
 OLLAMA_CHAT_MODEL=qwen3:30b-a3b
 OPENROUTER_CHAT_MODEL=anthropic/claude-3.5-sonnet
 
-# API Keys (Phase 2)
+# API Keys (for cloud processing)
 OPENROUTER_API_KEY=your-key-here
 
 # Deployment
@@ -111,18 +106,18 @@ WEB_PORT=8001
 NGROK_REGION=us
 ```
 
-## Switching Between Phases
+## Switching Between Providers
 
-### Phase 1 → Phase 2
+### Local to Cloud
 ```bash
-./deploy/setup_phase2.sh
+# Edit .env: LLM_PROVIDER=openrouter
+# Add: OPENROUTER_API_KEY=your-key-here
 ./deploy/deploy.sh restart
 ```
 
-### Phase 2 → Phase 1
+### Cloud to Local
 ```bash
-# Edit .env file
-LLM_PROVIDER=ollama
+# Edit .env: LLM_PROVIDER=ollama
 ./deploy/deploy.sh restart
 ```
 
@@ -167,7 +162,7 @@ python deploy/test_web.py
 ./deploy/deploy.sh logs
 ```
 
-### Cost Monitoring (Phase 2)
+### Cost Monitoring (OpenRouter)
 - **OpenRouter Dashboard**: https://openrouter.ai/keys
 - **Usage Tracking**: Real-time cost monitoring
 - **Billing Alerts**: Set up payment limits
@@ -196,7 +191,7 @@ python deploy/test_web.py
 ./deploy/deploy.sh logs
 ```
 
-#### API Issues (Phase 2)
+#### API Issues (OpenRouter)
 ```bash
 # Check API key
 curl -H "Authorization: Bearer $OPENROUTER_API_KEY" \
@@ -246,8 +241,7 @@ curl -H "Authorization: Bearer $OPENROUTER_API_KEY" \
 4. **Restart services**: `./deploy/deploy.sh restart`
 
 ### Documentation
-- **Phase 1 Guide**: `PHASE1_GUIDE.md`
-- **Phase 2 Guide**: `PHASE2_GUIDE.md`
+- **Deployment Guide**: `PHASE2_GUIDE.md`
 - **Main Guide**: `DEPLOYMENT_GUIDE.md` (in root)
 
 ### Useful Commands
@@ -272,9 +266,9 @@ python deploy/test_web.py
 - **Scaling**: Handle hundreds of users
 
 ### Current Priorities
-1. **Phase 1**: Get local deployment working
-2. **Phase 2**: Test with OpenRouter for better quality
+1. **Local Setup**: Get local deployment working with Ollama
+2. **Cloud Upgrade**: Test with OpenRouter for better quality
 3. **User Feedback**: Gather feedback from beta users
 4. **Iterate**: Improve based on user needs
 
-The deployment system is designed to be simple, reliable, and flexible. Start with Phase 1 for cost-free testing, then upgrade to Phase 2 when you need better quality responses.
+The deployment system is designed to be simple, reliable, and flexible. Start with local deployment for cost-free testing, then upgrade to cloud processing when you need better quality responses.
