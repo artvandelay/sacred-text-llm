@@ -287,9 +287,9 @@ test_setup() {
     
     # Test web app startup
     print_status "Testing web app startup..."
-    timeout 10s python3 deploy/web_app.py &
+    python3 deploy/web_app.py &
     WEB_PID=$!
-    sleep 3
+    sleep 5
     
     if curl -s http://localhost:8001/health >/dev/null 2>&1; then
         print_success "✓ Web app test passed"
