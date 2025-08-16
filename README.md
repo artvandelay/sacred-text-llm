@@ -49,16 +49,36 @@ This collection contains humanity's most treasured spiritual works:
 - **📱 Multiple Interfaces**: Chat UI, command line, or integrate via API
 - **⚡ Fast & Accurate**: Optimized chunking and retrieval for spiritual content
 
-**Status**: Phase 1 complete ✅ | Phase 2 deployed ✅ | Web deployment ready ✅ | Vector store complete ✅
+**Status**: ✅ Web Deployment Ready | ✅ Vector Store Complete | ✅ Production Ready
+
+**🆕 v2.2.0 Features**: Complete deployment system with public web access, hybrid OpenRouter+Ollama architecture, real-time agent streaming, and comprehensive setup automation.
 
 ## Quick Start
 
-### 1. Download Texts (if not done)
+> **⚠️ Prerequisites**: Python 3.10+, ~10GB free space, and 2-3 hours for initial setup
+
+### 1. Download Sacred Texts Archive (~4GB)
 ```bash
 python data/download_sacred_texts.py
 ```
 
-### 2. Deploy the Application
+### 2. Create Vector Database (Required - takes 1-2 hours)
+```bash
+# Install Ollama for embeddings
+# macOS: brew install ollama
+# Start Ollama service
+ollama serve &
+
+# Install required embedding model
+ollama pull nomic-embed-text
+
+# Create the vector database (this takes time!)
+python data/ingest.py --sources sacred_texts_archive/extracted --mode fast
+```
+
+**⏳ This step processes 33M+ words into a searchable database. Progress is shown.**
+
+### 3. Deploy the Application
 
 #### **🚀 Quick Deploy (Recommended)**
 ```bash
@@ -81,10 +101,68 @@ python agent_chat.py
 python query.py "What is the meaning of compassion?"
 ```
 
-### 3. Web Interface
+### 4. Web Interface
 After deployment, access your Sacred Texts LLM via:
 - **Local**: http://localhost:8001
 - **Public**: Your unique ngrok URL (shown during deployment)
+
+## 🆕 Complete Setup for New Users
+
+If you're starting from scratch, here's the complete process:
+
+### Step 1: Clone & Install
+```bash
+git clone https://github.com/your-username/sacred-text-LLM.git
+cd sacred-text-LLM
+pip install -r requirements.txt
+```
+
+### Step 2: Setup Ollama (Required for Embeddings)
+```bash
+# Install Ollama
+brew install ollama  # macOS
+# or visit https://ollama.ai for other platforms
+
+# Start Ollama service  
+ollama serve &
+
+# Install embedding model
+ollama pull nomic-embed-text
+```
+
+### Step 3: Data Collection & Processing (2-3 hours)
+```bash
+# Download sacred texts (~4GB, 15 minutes)
+python data/download_sacred_texts.py
+
+# Create vector database (~2GB, 1-2 hours)  
+python data/ingest.py --sources sacred_texts_archive/extracted --mode fast
+
+# Verify completion
+python data/check_progress.py
+```
+
+### Step 4: Get API Keys (5 minutes)
+```bash
+# 1. OpenRouter API key (for better LLM responses)
+# Visit: https://openrouter.ai/keys
+# Sign up free, get API key
+
+# 2. ngrok authentication (for public access)
+# Visit: https://ngrok.com/
+# Sign up free, get auth token
+```
+
+### Step 5: Deploy! 
+```bash
+# Setup deployment (will ask for API keys)
+./deploy/setup.sh
+
+# Deploy with public access
+./deploy/deploy.sh
+```
+
+**🎉 Your Sacred Texts LLM is now live!** Share the ngrok URL with others.
 
 ## Hybrid Architecture
 

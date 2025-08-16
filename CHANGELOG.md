@@ -1,5 +1,68 @@
 # Changelog
 
+## [v2.2.0] - Complete Deployment System - 2024-12-28
+
+### 🚀 Major Deployment Features
+
+#### **Hybrid Architecture**
+- **Cloud LLM Integration**: OpenRouter support for Claude 3.5 Sonnet, GPT-4, and other premium models
+- **Local Data Privacy**: ChromaDB vector database keeps sacred texts data completely local
+- **Intelligent Fallback**: Automatic fallback to local Ollama if OpenRouter fails
+- **Cost Monitoring**: Built-in OpenRouter usage tracking and cost management
+
+#### **Web Deployment System**
+- **Public Web Access**: ngrok integration for instant HTTPS public URLs
+- **Real-time Streaming**: WebSocket streaming of agent progress and console output
+- **Dual Mode Interface**: Complete web interface for both Chat and Deep Research Agent
+- **API Endpoints**: RESTful API (`/query`, `/health`, `/info`) for integration
+
+#### **Comprehensive Setup Automation**
+- **One-Command Setup**: `./deploy/setup.sh` handles all configuration
+- **Environment Management**: Smart `.env` file creation and validation
+- **Dependency Checking**: Automatic verification of Python, Ollama, ngrok, and API keys  
+- **Database Validation**: Vector store verification with document counting
+
+#### **Production-Ready Deployment**
+- **Service Management**: Start, stop, restart, status, logs commands
+- **Error Handling**: Graceful failure recovery and detailed error reporting
+- **Cross-Platform Support**: macOS, Linux compatibility with proper dependency detection
+- **Documentation**: Complete setup guides for new users from scratch
+
+### 📁 New File Structure
+```
+deploy/
+├── setup.sh              # Complete environment setup
+├── deploy.sh             # Service management
+├── web_app.py            # FastAPI web wrapper
+├── test_web.py           # Automated testing suite
+├── env.example           # Configuration template
+└── README.md             # Deployment documentation
+```
+
+### 🔧 Technical Improvements
+- **Rich Console Capture**: Preserves CLI formatting in web interface
+- **Progress UI Streaming**: Real-time agent thinking process via WebSocket
+- **Path Management**: Proper Python path handling for deploy folder structure
+- **Environment Isolation**: Clean separation of development and deployment configs
+
+### 📚 Documentation Overhaul
+- **Complete User Guide**: Step-by-step setup for new users (clone → deploy)
+- **Prerequisites Documentation**: Clear requirements (vector database, API keys, etc.)
+- **Architecture Explanation**: Hybrid local/cloud approach benefits
+- **Troubleshooting Guides**: Common issues and solutions
+
+### 🧪 Quality Assurance
+- **Automated Test Suite**: 5-test web interface validation
+- **Deployment Verification**: End-to-end testing from setup to public access
+- **Error Handling**: Comprehensive error catching and user-friendly messages
+- **Cross-Platform Testing**: macOS compatibility verified
+
+### 🎯 User Experience
+- **Zero-Config Web UI**: No frontend development needed
+- **Instant Sharing**: Public ngrok URLs for beta testing and demos
+- **Cost Transparency**: Clear OpenRouter usage and cost information
+- **Easy Provider Switching**: Toggle between local and cloud LLMs
+
 ## [v2.1.0] - Adaptive Intelligence Architecture - 2024-12-28
 
 ### 🧠 Revolutionary Intelligence

@@ -8,13 +8,29 @@ This folder contains everything needed to deploy your Sacred Texts LLM applicati
 - **Cloud OpenRouter**: Uses best-in-class LLMs (Claude, GPT-4) for superior responses
 - **ngrok Integration**: Public HTTPS access for sharing and testing
 
+## Prerequisites
+
+> **⚠️ IMPORTANT**: You must complete data ingestion BEFORE deployment!
+
+### Required Steps Before Deployment:
+1. **Download sacred texts**: `python data/download_sacred_texts.py`
+2. **Install Ollama**: `brew install ollama` (macOS) or visit [ollama.ai](https://ollama.ai)
+3. **Create vector database**: `python data/ingest.py --sources sacred_texts_archive/extracted --mode fast`
+4. **Verify vector store**: Should have 200K+ documents in `vector_store/chroma/`
+
+### Additional Requirements:
+- **Python 3.10+** with pip
+- **~10GB free space** (texts + vector database)
+- **OpenRouter API key** ([get one free](https://openrouter.ai/keys))
+- **ngrok account** ([sign up free](https://ngrok.com/))
+
 ## Quick Start
 
 ```bash
-# Setup deployment environment
+# 1. Setup deployment environment
 ./deploy/setup.sh
 
-# Deploy with public access
+# 2. Deploy with public access
 ./deploy/deploy.sh
 ```
 
