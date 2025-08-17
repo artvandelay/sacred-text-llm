@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-CLI entrypoint for Sacred Texts Agent
+Legacy CLI entrypoint - DEPRECATED
+
+The SacredTextsAgent has been refactored into modes.
+Use agent_chat.py instead.
 """
 
-from app.agent.core import SacredTextsAgent
-
-
 def main() -> None:
-    agent = SacredTextsAgent()
-    agent.run()
+    print("This CLI is deprecated. Use 'python agent_chat.py' instead.")
+    print("The agent has been refactored into a modes architecture.")
 
 
 if __name__ == "__main__":
