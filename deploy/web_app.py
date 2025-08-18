@@ -42,11 +42,11 @@ active_connections: List[WebSocket] = []
 async def lifespan(app: FastAPI):
     """Initialize resources on startup."""
     # Initialize on startup
-    print(f"Starting Sacred Texts Web API...")
-    print(f"Available modes: {list(MODES.keys())}")
+    logging.info("Starting Sacred Texts Web API...")
+    logging.info("Available modes: %s", list(MODES.keys()))
     yield
     # Cleanup on shutdown
-    print("Shutting down...")
+    logging.info("Shutting down...")
 
 
 app = FastAPI(title="Sacred Texts LLM", lifespan=lifespan)

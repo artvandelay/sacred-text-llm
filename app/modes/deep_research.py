@@ -290,7 +290,7 @@ Focus on diverse traditions and perspectives."""
             return parse_json_response(response, fallback)
             
         except Exception as e:
-            print(f"Query generation error: {e}")
+            import logging; logging.exception("Query generation error")
             return {
                 "reasoning": "Fallback search",
                 "needs_search": True,
@@ -344,7 +344,7 @@ Be concise but insightful. Focus on synthesis, not just summary."""
             ], model)
             return response.strip()
         except Exception as e:
-            print(f"Synthesis error: {e}")
+            import logging; logging.exception("Synthesis error")
             return ""
     
     def _reflect_on_evidence(self, state: DeepResearchState, current_iteration: int) -> Dict[str, Any]:
@@ -402,7 +402,7 @@ Respond in JSON format:
             return parse_json_response(response, fallback)
             
         except Exception as e:
-            print(f"Reflection error: {e}")
+            import logging; logging.exception("Reflection error")
             return {
                 "confidence": 0.5,
                 "reasoning": "Error in reflection",
