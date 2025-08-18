@@ -1,5 +1,11 @@
-# Sacred Texts LLM
-> *AI-powered gateway to 33+ million words of spiritual wisdom from 40+ traditions*
+<div align="center">
+  <img src="assets/logo.png" alt="Sacred Texts LLM Logo" width="200" height="200">
+  
+  # Sacred Texts LLM
+  ### AI Wisdom Gateway
+  
+  *AI-powered gateway to 33+ million words of spiritual wisdom from 40+ traditions*
+</div>
 
 Chat with sacred texts using advanced AI - query the Bhagavad Gita, Bible, Quran, Buddhist sutras, Tao Te Ching, and hundreds more spiritual texts with semantic search and intelligent responses.
 
@@ -46,6 +52,10 @@ python agent_chat.py                    # Multi-mode interface
 ./deploy/deploy.sh
 # Visit http://localhost:8001 or your ngrok URL
 ```
+
+<div align="center">
+  <img src="assets/logo.png" alt="Sacred Texts LLM" width="120" height="120">
+</div>
 
 **⏱️ Setup time**: 15 minutes download + 1-2 hours processing | **💾 Space needed**: ~10GB
 
