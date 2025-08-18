@@ -1,269 +1,275 @@
-# Sacred Texts LLM Interface
-> *An AI-powered gateway to 33+ million words of spiritual wisdom*
+# Sacred Texts LLM
+> *AI-powered gateway to 33+ million words of spiritual wisdom from 40+ traditions*
 
-**🎯 Goal**: Query and converse with sacred texts from world religions and spiritual traditions using advanced RAG (Retrieval-Augmented Generation).
+Chat with sacred texts using advanced AI - query the Bhagavad Gita, Bible, Quran, Buddhist sutras, Tao Te Ching, and hundreds more spiritual texts with semantic search and intelligent responses.
 
-## 📊 **Complete Collection Report**
+*Texts courtesy of [sacred-texts.com](https://sacred-texts.com/) - "the largest freely available archive of online books about religion, mythology, folklore and the esoteric on the Internet"*
+
+## 🚀 Quick Start
+
+### Get Running in 15 Minutes
+
+```bash
+# 1. Clone and install
+git clone https://github.com/artvandelay/sacred-text-llm
+cd sacred-text-LLM
+pip install -r requirements.txt
+
+# 2. Get the data (choose one):
+python data/download_sacred_texts.py    # Download from sacred-texts.com (4GB, 15min)
+# OR contact authors for pre-built vector database
+
+# 3. Set up environment (IMPORTANT!)
+cp .env.example .env                     # Copy environment template
+# Edit .env file with your settings:
+# - OPENROUTER_API_KEY=your-key-here (for better AI models)
+# - LLM_PROVIDER=openrouter (or ollama for local-only)
+
+# 4. Install AI models
+brew install ollama                      # macOS
+ollama serve &
+ollama pull nomic-embed-text
+ollama pull qwen3:30b-a3b               # or your preferred model
+
+# 5. Create vector database (if downloaded texts)
+# This processes 33M+ words into ChromaDB with semantic embeddings
+# Converts texts into 210K+ searchable chunks for AI retrieval
+# Takes 1-2 hours but enables intelligent semantic search
+python data/ingest.py --sources sacred_texts_archive/extracted
+
+# 6. Start chatting!
+python agent_chat.py                    # Multi-mode interface
+```
+
+### Deploy Web Interface
+```bash
+./deploy/deploy.sh
+# Visit http://localhost:8001 or your ngrok URL
+```
+
+**⏱️ Setup time**: 15 minutes download + 1-2 hours processing | **💾 Space needed**: ~10GB
+
+### Common Configuration Options
+
+After setup, you can tune the AI behavior by editing your `.env` file:
+
+```bash
+# AI Provider & Models
+LLM_PROVIDER=openrouter                    # ollama (local) or openrouter (cloud)
+OLLAMA_CHAT_MODEL=qwen3:30b-a3b           # Local model choice
+OPENROUTER_CHAT_MODEL=anthropic/claude-3.5-sonnet  # Cloud model choice
+
+# Deep Research Behavior  
+MAX_ITERATIONS_PER_QUERY=4                # How many research cycles (1-8)
+CONFIDENCE_THRESHOLD=0.75                 # When to stop researching (0.1-1.0)
+MAX_PARALLEL_QUERIES=10                   # Search breadth per iteration (1-20)
+
+# Search Settings
+DEFAULT_SEARCH_K=5                        # Results per search (1-20)
+MAX_TOTAL_EVIDENCE_CHUNKS=15              # Total passages to analyze (5-50)
+
+# UI Options
+SHOW_AGENT_PROGRESS=true                  # Show thinking process
+SHOW_DETAILED_PROGRESS=true               # Verbose progress updates
+SHOW_CONFIDENCE_SCORES=true               # Display confidence levels
+```
+
+**Quick tweaks:**
+- **Faster responses**: Lower `MAX_ITERATIONS_PER_QUERY` to 2
+- **Deeper research**: Increase `MAX_PARALLEL_QUERIES` to 15-20  
+- **Better quality**: Switch to `LLM_PROVIDER=openrouter` with API key
+- **Local only**: Keep `LLM_PROVIDER=ollama` (no API key needed)
+
+## 🎛️ Modes & Usage
+
+The v3.0 architecture introduces **modes** - isolated experimental features you can switch between or extend with your own ideas.
+
+### Current Modes
+
+**🔍 Deep Research Mode** (`deep_research`)
+- Iterative AI agent that plans, searches, and synthesizes comprehensive responses
+- Performs 1-4 research cycles with parallel queries for thorough investigation
+- Best for: Complex questions, cross-tradition comparisons, scholarly research
+
+```bash
+python agent_chat.py --mode deep_research --query "How do different traditions view suffering?"
+```
+
+**🧘 Contemplative Mode** (`contemplative`) 
+- Returns a single relevant passage with a thoughtful reflection question
+- Focused on personal spiritual practice and meditation
+- Best for: Daily reflection, spiritual guidance, mindfulness practice
+
+```bash
+python agent_chat.py --mode contemplative --query "What is inner peace?"
+```
+
+### Other Interface Options
+
+```bash
+python scripts/chat.py                  # Simple chat interface
+python scripts/query.py "What is compassion?"  # Single questions
+```
+
+### Create Your Own Mode
+
+Want to experiment with a new approach? The architecture makes it easy:
+
+```bash
+# 1. Generate a new mode template
+python scripts/new_mode.py your_mode_name
+
+# 2. Edit the generated file with your logic
+# app/modes/your_mode.py is created with the basic structure
+
+# 3. Register it in the system
+# Add to app/modes/registry.py
+
+# 4. Test your mode
+python agent_chat.py --mode your_mode --query "test question"
+
+# 5. Deploy instantly
+./deploy/deploy.sh restart
+```
+
+**Mode Ideas:** Koan generator, verse finder, tradition comparison, debate facilitator, meditation guide, ritual explanation, historical context, or anything you can imagine!
+
+## 📚 What's Included
 
 ### **Scale & Coverage**
 - **📚 33,298,287 words** (33.3 million) across 362 sacred texts
 - **📄 2,200,367 lines** of spiritual wisdom (~73,345 pages at 30 lines/page)
-- **📖 Equivalent to 295 full books** - a massive digital spiritual library
 - **🌍 40+ spiritual traditions** spanning all major world religions
 - **🔍 210K+ semantic chunks** optimized for AI retrieval
 
-### **📖 Famous Texts Included**
-This collection contains humanity's most treasured spiritual works:
+### **📖 Famous Texts**
 
-**📿 Hindu Classics:**
-- Srimad-Bhagavad-Gita (Swami Swarupananda translation)
-- The Upanishads, Parts 1 & 2 (Max Muller translation)
-- Complete Mahabharata texts
-- Vedic literature and Puranas
+**📿 Hindu Classics:** Bhagavad Gita, Upanishads, Mahabharata, Vedic literature  
+**🕉️ Buddhist Wisdom:** Jataka Tales, Dhammapada, Tibetan and Zen texts  
+**☪️ Islamic Heritage:** Quran, Sufi poetry, classical Islamic philosophy  
+**✝️ Christian Tradition:** Church Fathers (Augustine, Aquinas), mystical texts  
+**🕊️ Other Traditions:** Tao Te Ching, Jewish mystical texts, Indigenous wisdom, Hermetic texts
 
-**🕉️ Buddhist Wisdom:**
-- The Jataka Tales (complete 6-volume set)
-- Dhammapada and core Buddhist sutras
-- Tibetan and Zen texts
+## ✨ Features
 
-**☪️ Islamic Heritage:**
-- The Qur'an (Rodwell edition, 1876)
-- Sufi poetry and mystical texts
-- Classical Islamic philosophy
-
-**✝️ Christian Tradition:**
-- Church Fathers (Augustine, Aquinas)
-- Mystical and contemplative texts
-- Early Christian writings
-
-**🕊️ Other Traditions:**
-- Tao Te Ching and Taoist classics
-- Jewish mystical texts and philosophy
-- Indigenous wisdom traditions
-- Hermetic and esoteric texts
-
-## ✨ **What Makes This Special**
 - **🧠 Semantic Search**: Find wisdom by meaning, not just keywords
+- **🎛️ Experimental Modes**: Deep research agent + contemplative reflection modes
 - **🤖 Modular AI**: Switch between local models (Ollama) and cloud APIs (GPT-4, Claude)
-- **🔒 Privacy-First**: Keep sacred texts local, choose your AI provider
+- **🔒 Privacy-First**: Keep sacred texts local, choose your AI provider, zero telemetry
 - **📱 Multiple Interfaces**: Chat UI, command line, or integrate via API
 - **⚡ Fast & Accurate**: Optimized chunking and retrieval for spiritual content
+- **🏗️ Clean Architecture**: Easy to add new experimental modes and features
 
-**Status**: ✅ Web Deployment Ready | ✅ Vector Store Complete | ✅ Production Ready
+**🆕 v3.0.0**: Clean modes architecture, unified configuration, privacy-first design, experimental modes system
 
-**🆕 v2.2.0 Features**: Complete deployment system with public web access, hybrid OpenRouter+Ollama architecture, real-time agent streaming, and comprehensive setup automation.
+## 📖 Advanced Setup
 
-## Quick Start
+### Prerequisites
+- **Python 3.10+** with pip
+- **~10GB free space** (texts + vector database)
+- **2-3 hours** for initial setup (mostly processing time)
 
-> **⚠️ Prerequisites**: Python 3.10+, ~10GB free space, and 2-3 hours for initial setup
+### Detailed Installation
 
-### 1. Download Sacred Texts Archive (~4GB)
+#### Step 1: Environment Setup
 ```bash
-python data/download_sacred_texts.py
-```
-
-### 2. Create Vector Database (Required - takes 1-2 hours)
-```bash
-# Install Ollama for embeddings
-# macOS: brew install ollama
-# Start Ollama service
-ollama serve &
-
-# Install required embedding model
-ollama pull nomic-embed-text
-
-# Create the vector database (this takes time!)
-python data/ingest.py --sources sacred_texts_archive/extracted --mode fast
-```
-
-**⏳ This step processes 33M+ words into a searchable database. Progress is shown.**
-
-### 3. Deploy the Application
-
-#### **🚀 Quick Deploy (Recommended)**
-```bash
-# Setup deployment environment
-./deploy/setup.sh
-
-# Deploy with public access
-./deploy/deploy.sh
-```
-
-#### **💬 Command Line Interface**
-```bash
-# Simple chat interface
-python chat.py
-
-# Advanced agentic research interface  
-python agent_chat.py
-
-# Single query
-python query.py "What is the meaning of compassion?"
-```
-
-### 4. Web Interface
-After deployment, access your Sacred Texts LLM via:
-- **Local**: http://localhost:8001
-- **Public**: Your unique ngrok URL (shown during deployment)
-
-## 🆕 Complete Setup for New Users
-
-If you're starting from scratch, here's the complete process:
-
-### Step 1: Clone & Install
-```bash
-git clone https://github.com/your-username/sacred-text-LLM.git
+git clone <your-repo-url>
 cd sacred-text-LLM
 pip install -r requirements.txt
 ```
 
-### Step 2: Setup Ollama (Required for Embeddings)
+#### Step 2: Install Ollama (Local AI)
 ```bash
-# Install Ollama
-brew install ollama  # macOS
-# or visit https://ollama.ai for other platforms
+# macOS
+brew install ollama
 
-# Start Ollama service  
+# Linux
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Start Ollama service
 ollama serve &
 
 # Install embedding model
 ollama pull nomic-embed-text
+
+# Install chat model
+ollama pull qwen3:30b-a3b
 ```
 
-### Step 3: Data Collection & Processing (2-3 hours)
+#### Step 3: Data Collection & Processing
 ```bash
-# Download sacred texts (~4GB, 15 minutes)
+# Option A: Download sacred texts (~4GB, 15 minutes)
 python data/download_sacred_texts.py
 
-# Create vector database (~2GB, 1-2 hours)  
+# Option B: Contact authors for pre-built vector database
+
+# If using Option A, create vector database (~2GB, 1-2 hours)  
 python data/ingest.py --sources sacred_texts_archive/extracted --mode fast
 
 # Verify completion
 python data/check_progress.py
 ```
 
-### Step 4: Get API Keys (5 minutes)
-```bash
-# 1. OpenRouter API key (for better LLM responses)
-# Visit: https://openrouter.ai/keys
-# Sign up free, get API key
+#### Step 4: Optional - Cloud AI Setup
+For better chat quality, set up OpenRouter API:
 
-# 2. ngrok authentication (for public access)
-# Visit: https://ngrok.com/
-# Sign up free, get auth token
+```bash
+export OPENROUTER_API_KEY="your-key-here"
+export LLM_PROVIDER="openrouter"  # Switches from local to cloud
 ```
 
-### Step 5: Deploy! 
+#### Step 5: Deploy & Test
 ```bash
-# Setup deployment (will ask for API keys)
-./deploy/setup.sh
-
-# Deploy with public access
+# Deploy web interface
 ./deploy/deploy.sh
+
+# Test CLI interfaces
+python agent_chat.py --list-modes
+python agent_chat.py --mode contemplative --query "What is wisdom?"
 ```
 
-**🎉 Your Sacred Texts LLM is now live!** Share the ngrok URL with others.
+### Configuration Options
 
-## Hybrid Architecture
+Edit environment variables or `.env` file:
 
-The system uses a **hybrid approach** combining the best of local and cloud:
-
-### **Primary: OpenRouter Cloud LLMs**
 ```bash
-# Configured in .env file
-LLM_PROVIDER=openrouter
-OPENROUTER_API_KEY=your-key-here
-OPENROUTER_CHAT_MODEL=anthropic/claude-3.5-sonnet
+# AI Provider Settings
+LLM_PROVIDER=ollama                    # or "openrouter"
+OLLAMA_CHAT_MODEL=qwen3:30b-a3b       # Local model
+OPENROUTER_CHAT_MODEL=anthropic/claude-3.5-sonnet  # Cloud model
+
+# Database Settings
+VECTOR_STORE_DIR=vector_store/chroma   # Database location
+COLLECTION_NAME=sacred_texts           # Collection name
+
+# Agent Behavior
+MAX_ITERATIONS_PER_QUERY=4            # Research depth
+CONFIDENCE_THRESHOLD=0.75              # Quality threshold
+MAX_PARALLEL_QUERIES=10                # Search breadth
 ```
 
-**Benefits:**
-- 🚀 **Superior Quality**: GPT-4, Claude 3.5 Sonnet responses
-- 💰 **Cost Effective**: ~$0.01-0.10 per question
-- 🔄 **Latest Models**: Always access to newest LLMs
+### Troubleshooting
 
-### **Fallback: Local Ollama**
+**Vector store empty?**
 ```bash
-# Automatic fallback if OpenRouter fails
-OLLAMA_CHAT_MODEL=qwen3:30b-a3b
-ENABLE_OLLAMA_FALLBACK=true
+python data/check_progress.py
+# Should show ~200K documents. If 0, re-run ingestion.
 ```
 
-**Benefits:**
-- ✅ **Reliability**: Never fails completely
-- ✅ **Privacy**: Local processing when needed
-- ✅ **No Dependency**: Works offline
-
-### **Data Privacy**
-- 📚 **Sacred texts**: Always stored locally (ChromaDB)
-- 🔒 **Queries only**: Only your questions go to OpenRouter
-- 🏠 **Full control**: Switch to local-only anytime
-
-## 🤖 **Agentic Chat Interface**
-
-The advanced `agent_chat.py` provides an iterative AI agent that thinks, plans, and searches multiple times before responding:
-
-### **Agent Capabilities:**
-- **🧠 Strategic Planning**: Analyzes your question and plans search strategy
-- **🔍 Parallel Search**: Runs multiple refined searches simultaneously  
-- **🤔 Evidence Evaluation**: Reflects on sufficiency before responding
-- **⚡ Iterative Refinement**: Continues searching until confident or max iterations
-- **📊 Progress Tracking**: Shows thinking process in real-time (like Cursor/Perplexity)
-
-### **Agent Configuration:**
+**Ollama connection issues?**
 ```bash
-# Use environment variables or defaults in agent_config.py
-export MAX_ITERATIONS_PER_QUERY=4        # Max search iterations
-export CONFIDENCE_THRESHOLD=0.75         # Stop when this confident
-export MAX_PARALLEL_QUERIES=3            # Simultaneous searches
-export SHOW_AGENT_PROGRESS=true          # Show thinking process
+ollama list                           # Check installed models
+ollama serve &                        # Restart service
+curl http://localhost:11434/api/tags  # Test API
 ```
 
-### **Best For:**
-- **Complex spiritual questions** requiring multiple perspectives
-- **Cross-tradition comparisons** (Buddhism vs Christianity vs Islam)
-- **Deep philosophical inquiries** needing comprehensive evidence
-- **Research-quality responses** with multiple sources
-
-### **Example Agent Behavior:**
-```
-🤖 Thinking about: "How do different traditions view suffering?"
-
-🧠 Planning: Strategy planned → Focus: Cross-tradition perspectives on suffering
-🔍 Searching: Running 3 parallel queries...
-    • Buddhist teachings on suffering and dukkha
-    • Christian perspectives on suffering and redemption  
-    • Islamic views on suffering and divine wisdom
-🤔 Reflecting: Confidence: 85% → Quality: excellent
-✍️ Generating: Synthesizing final response
-✅ Complete in 2 iterations
+**Deployment issues?**
+```bash
+./deploy/setup.sh check              # Validate environment
+python deploy/test_web.py            # Test web interface
 ```
 
----
-
-## Notes for Agent
-
-### Project Phases
-**Phase 1: Data Collection** ✅ COMPLETE
-- Created downloader for sacred-texts.com archive
-- 353 texts covering all major spiritual traditions
-- ~4-5GB total data with organized structure
-- Tested and verified download scripts
-
-**Phase 2: RAG Implementation** 🚧 IN PROGRESS
-- ✅ Text processing and chunking (adaptive semantic/verse/paragraph)
-- ⚡ Embedding generation (1/705 files, ~3 hours remaining)
-- ✅ Vector database setup (ChromaDB)
-- ✅ Basic search interface development
-
-**Phase 3: Chat Interface** ✅ READY
-- ✅ Interactive chat interface (chat.py) 
-- ✅ Command-line query tool (query.py)
-- ✅ Rich formatting and source attribution
-- ✅ Multi-tradition knowledge synthesis
-
-### Data Sources
-- **Primary**: [sacred-texts.com/download.htm](https://sacred-texts.com/download.htm)
-- **Alternative**: [Google Drive backup](https://drive.google.com/drive/u/0/folders/1VYTr5l7jARi_Kb_aB0Jjjq2RZF9kacK7)
+## 📋 Project Info
 
 ### Technical Details
 - **Archive Size**: 249 MB total (183 MB extracted texts)
@@ -272,46 +278,38 @@ export SHOW_AGENT_PROGRESS=true          # Show thinking process
 - **Download Time**: 10-15 minutes
 - **Structure**: Maintains sacred-texts.com hierarchy by tradition
 
-### Collections Included
-- **Buddhism**: 22 files (Jataka, Dhammapada, etc.)
-- **Hinduism**: 23 files (Upanishads, Bhagavad Gita, etc.)
-- **Christianity**: 25 files (Augustine, Aquinas, mystical texts)
-- **Islam**: 15 files (Quran translations, Sufi poetry)
-- **Judaism**: 9 files (Talmud, Kabbalah, Maimonides)
-- **Taoism**: 6 files (Tao Te Ching, Art of War)
-- **Celtic/Norse**: 64 files (Mabinogion, Poetic Edda)
-- **Native American**: 13 files (Creation myths, tribal wisdom)
-- **Esoteric**: 16 files (Hermetic texts, Gnostic gospels)
-- **Other traditions**: 35+ categories
+### Data Sources
+- **Primary**: [sacred-texts.com/download.htm](https://sacred-texts.com/download.htm)
+- **Alternative**: Contact authors for pre-built vector database
 
-### Download Script Features
-- Progress tracking with resume capability
-- User-Agent handling to avoid 403 errors
-- Maintains original directory structure
-- Automatic extraction option
-- Detailed logging and error reporting
-- Creates collection metadata
+### Development Phases
+**Phase 1: Data Collection** ✅ COMPLETE
+- ✅ Text processing and chunking (adaptive semantic/verse/paragraph)
+- ✅ Embedding generation and vector database setup
+- ✅ Basic search interface development
 
-### File Organization
-```
-sacred_texts_archive/
-├── afr/          # African traditions
-├── bud/          # Buddhism  
-├── chr/          # Christianity
-├── hin/          # Hinduism
-├── isl/          # Islam
-├── jud/          # Judaism
-├── tao/          # Taoism
-├── neu/          # European/Norse
-├── nam/          # Native American
-├── eso/          # Esoteric/Occult
-└── extracted/    # Uncompressed texts
-```
+**Phase 2: AI Interface** ✅ COMPLETE
+- ✅ Multi-mode interface (agent_chat.py) with deep research and contemplative modes
+- ✅ Simple chat interface (scripts/chat.py) 
+- ✅ Command-line query tool (scripts/query.py)
+- ✅ Rich formatting and source attribution
+- ✅ Multi-tradition knowledge synthesis
 
-### Testing Completed
-- ✅ URL accessibility verified
-- ✅ Download functionality tested
-- ✅ Content verification (extracted Lao Tzu text)
-- ✅ Complete catalog validation (362 files = 100% coverage)
-- ✅ User-Agent fix applied for 403 errors
-- ✅ Directory structure maintenance confirmed
+**Phase 3: Architecture** ✅ COMPLETE (v3.0.0)
+- ✅ Clean modes system for experimental features
+- ✅ Unified configuration and privacy-first design
+- ✅ Streamlined codebase and deployment system
+
+### Contributing
+
+The v3.0 architecture makes it easy to contribute new modes or features:
+
+1. **Create a mode**: Use `python scripts/new_mode.py your_idea`
+2. **Test locally**: `python agent_chat.py --mode your_idea`
+3. **Deploy instantly**: `./deploy/deploy.sh restart`
+
+See `docs/creating-new-modes.md` for detailed guidance.
+
+---
+
+*Sacred Texts LLM v3.0.0 - Built for spiritual wisdom seekers, researchers, and AI experimenters*
