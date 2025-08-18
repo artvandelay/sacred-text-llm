@@ -13,7 +13,7 @@ from typing import Generator, Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 
 from app.modes.base import BaseMode
-from app.modes.config import DEEP_RESEARCH_CONFIG
+# Settings imported from main config (environment-driven)
 from app import config as agent_config
 from app.core.state import SearchResult, parse_json_response
 from app.core.vector_store import VectorStore, ChromaVectorStore
@@ -56,7 +56,7 @@ class DeepResearchMode(BaseMode):
     
     def __init__(self, llm_provider, vector_store):
         super().__init__(llm_provider, vector_store)
-        self.config = DEEP_RESEARCH_CONFIG
+        # Use environment-driven config from main app.config
         # adapt collection to vector store interface if needed
         if hasattr(vector_store, "query"):
             self.store: VectorStore = ChromaVectorStore(vector_store)
@@ -78,16 +78,16 @@ class DeepResearchMode(BaseMode):
         yield {
             "type": "session_start",
             "question": query,
-            "max_iterations": self.config["max_iterations"]
+            "max_iterations": agent_config.MAX_ITERATIONS_PER_QUERY
         }
         
         try:
             # Main research loop
-            for iteration_num in range(self.config["max_iterations"]):
+            for iteration_num in range(agent_config.MAX_ITERATIONS_PER_QUERY):
                 yield {
                     "type": "iteration_start",
                     "iteration": iteration_num + 1,
-                    "max_iterations": self.config["max_iterations"]
+                    "max_iterations": agent_config.MAX_ITERATIONS_PER_QUERY
                 }
                 
                 # Step 1: Generate research queries
@@ -99,7 +99,7 @@ class DeepResearchMode(BaseMode):
                     break
                 
                 # Extract queries from plan
-                search_queries = query_plan.get("search_queries", [query])[:self.config["max_parallel_queries"]]
+                search_queries = query_plan.get("search_queries", [query])[:agent_config.MAX_PARALLEL_QUERIES]
                 yield {
                     "type": "search_planned",
                     "queries": search_queries,
@@ -161,7 +161,7 @@ class DeepResearchMode(BaseMode):
                 })
                 
                 # Check termination conditions
-                if confidence >= self.config["confidence_threshold"]:
+                if confidence >= agent_config.CONFIDENCE_THRESHOLD:
                     yield {"type": "confidence_reached", "confidence": confidence}
                     break
                 
@@ -218,7 +218,7 @@ class DeepResearchMode(BaseMode):
         if len(queries) == 1:
             return [self._search_texts(queries[0], k)]
         
-        with concurrent.futures.ThreadPoolExecutor(max_workers=self.config["max_parallel_queries"]) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=agent_config.MAX_PARALLEL_QUERIES) as executor:
             future_to_query = {executor.submit(self._search_texts, query, k): query for query in queries}
             
             results = []
