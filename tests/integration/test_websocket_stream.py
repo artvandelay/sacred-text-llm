@@ -12,7 +12,7 @@ except Exception:
 
 def test_websocket_streaming_if_available():
     if websockets is None:
-        return  # skip if websockets not installed
+        pytest.skip("websockets not installed")  # skip if websockets not installed
 
     # Start server
     env = None

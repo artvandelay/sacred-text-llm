@@ -25,5 +25,7 @@ requests>=2.31.0
 pytest>=8.2.0
 pytest-asyncio>=0.23.7
 pytest-mock>=3.12.0
+pytest-xdist>=3.5.0
+pytest-sugar>=0.9.7
 
 # Note: All features (chat, agent, web deployment) work with these dependencies
