@@ -2,6 +2,7 @@ import subprocess
 import sys
 import time
 import json
+import pytest
 
 try:
     import websockets
@@ -12,7 +13,8 @@ except Exception:
 
 def test_websocket_streaming_if_available():
     if websockets is None:
-        pytest.skip("websockets not installed")  # skip if websockets not installed
+        pytest.skip("websockets not installed")
+        return  # skip if websockets not installed
 
     # Start server
     env = None
