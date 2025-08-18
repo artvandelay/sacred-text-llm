@@ -1,9 +1,6 @@
 <div align="center">
   <img src="assets/logo.png" alt="Sacred Texts LLM Logo" width="200" height="200">
   
-  # Sacred Texts LLM
-  ### AI Wisdom Gateway
-  
   *AI-powered gateway to 33+ million words of spiritual wisdom from 40+ traditions*
 </div>
 
