@@ -5,7 +5,7 @@ import re
 import chromadb
 import ollama
 
-from app.chat.config import (
+from app.config import (
     EMBEDDING_MODEL, VECTOR_STORE_DIR, COLLECTION_NAME,
     LLM_PROVIDER, OLLAMA_CHAT_MODEL, OPENROUTER_CHAT_MODEL
 )

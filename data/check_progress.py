@@ -10,7 +10,7 @@ import chromadb
 
 # Add parent directory to path so we can import from app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app.chat.config import VECTOR_STORE_DIR, COLLECTION_NAME
+from app.config import VECTOR_STORE_DIR, COLLECTION_NAME
 
 def check_ingestion_process():
     """Check if ingestion is running"""

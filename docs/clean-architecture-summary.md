@@ -23,9 +23,9 @@ app/
 │   ├── deep_research.py     # Self-contained mode (470 lines)
 │   └── contemplative.py     # Self-contained mode (110 lines)
 ├── agent/
-│   ├── core.py              # Nearly empty (10 lines)
-│   ├── config.py            # Existing env config
+│   ├── core.py              # Legacy stub (will be removed)
 │   └── state.py             # Shared data structures
+├── config.py                # Unified config import surface (use this)
 └── providers.py             # LLM providers
 
 agent_chat.py                # Thin CLI dispatcher (129 lines)

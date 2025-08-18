@@ -15,7 +15,7 @@ import time
 
 # Add parent directory to path so we can import from app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app.chat.config import EMBEDDING_MODEL, VECTOR_STORE_DIR, COLLECTION_NAME
+from app.config import EMBEDDING_MODEL, VECTOR_STORE_DIR, COLLECTION_NAME
 from llama_index.core import Document
 from llama_index.core.node_parser import SemanticSplitterNodeParser
 from llama_index.embeddings.ollama import OllamaEmbedding
