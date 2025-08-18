@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from app.modes.base import BaseMode
 from app.modes.config import DEEP_RESEARCH_CONFIG
 from app.agent import config as agent_config
-from app.agent.state import SearchResult, parse_json_response
+from app.core.state import SearchResult, parse_json_response
 from app.core.vector_store import VectorStore, ChromaVectorStore
 import ollama
 

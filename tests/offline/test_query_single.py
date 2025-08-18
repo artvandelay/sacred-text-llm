@@ -38,7 +38,7 @@ def test_query_single_offline(monkeypatch, capsys):
     monkeypatch.setattr(chromadb, "PersistentClient", lambda path=None: DummyClient())
 
     # Patch provider factory to avoid network
-    import app.providers as providers
+    import app.core.providers as providers
     monkeypatch.setattr(providers, "create_provider", lambda provider_name: DummyLLM())
 
     # Execute query.main with argv

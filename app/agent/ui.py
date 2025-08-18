@@ -15,7 +15,7 @@ from rich.live import Live
 from rich.layout import Layout
 from rich.align import Align
 
-from app.agent.state import AgentState, AgentStep, AgentIteration
+from app.core.state import AgentState, AgentStep, AgentIteration
 from app.agent import config
 
 
