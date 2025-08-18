@@ -134,6 +134,11 @@ python agent_chat.py --mode your_mode --query "test question"
 
 **Mode Ideas:** Koan generator, verse finder, tradition comparison, debate facilitator, meditation guide, ritual explanation, historical context, or anything you can imagine!
 
+### Learn More
+
+- **📖 [v3.0 Architecture Guide](docs/v3-architecture.md)** - Complete technical overview
+- **🛠️ [Creating New Modes](docs/creating-new-modes.md)** - Step-by-step mode development
+
 ## 📚 What's Included
 
 ### **Scale & Coverage**

@@ -1,5 +1,39 @@
 # Changelog
 
+## [v3.0.0] - Clean Architecture & Modes System - 2025-01-XX
+
+### 🏗️ Major Architecture Overhaul
+
+#### **Modes System**
+- **Experimental Modes**: Isolated experimental features (deep_research, contemplative)
+- **Easy Extensibility**: Simple template for creating new modes
+- **Mode Registry**: Single source of truth for all available modes
+- **Generator Pattern**: Streaming updates and final responses
+
+#### **Configuration Unification**
+- **Single Config**: Consolidated all settings into `app/config.py`
+- **Environment-Driven**: All behavior configurable via environment variables
+- **Privacy-First**: Disabled ChromaDB telemetry for fully local operation
+- **No Config Duplication**: Eliminated redundant config files
+
+#### **Codebase Cleanup**
+- **Legacy Removal**: Deleted `app/agent/`, `app/chat/`, redundant files
+- **Clean Structure**: `app/core/` for infrastructure, `app/modes/` for features
+- **Entry Point Clarity**: `agent_chat.py` as main, scripts moved to `scripts/`
+- **Testing Improvements**: Parallel pytest execution with progress bars
+
+### 📁 Breaking Changes
+- Moved `chat.py` → `scripts/chat.py`
+- Moved `query.py` → `scripts/query.py`
+- Removed `app/agent/config.py` and `app/chat/config.py`
+- Unified all configuration in `app/config.py`
+
+### ✨ Features
+- Multi-mode interface with deep research and contemplative modes
+- Configuration tuning options for AI behavior
+- Clean architecture for rapid experimentation
+- Zero telemetry for complete privacy
+
 ## [v2.2.0] - Complete Deployment System - 2024-12-28
 
 ### 🚀 Major Deployment Features

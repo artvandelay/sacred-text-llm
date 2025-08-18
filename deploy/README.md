@@ -13,9 +13,9 @@ This folder contains everything needed to deploy your Sacred Texts LLM applicati
 > **⚠️ IMPORTANT**: You must complete data ingestion BEFORE deployment!
 
 ### Required Steps Before Deployment:
-1. **Download sacred texts**: `python data/download_sacred_texts.py`
+1. **Get sacred texts**: `python data/download_sacred_texts.py` OR contact authors for pre-built vector database
 2. **Install Ollama**: `brew install ollama` (macOS) or visit [ollama.ai](https://ollama.ai)
-3. **Create vector database**: `python data/ingest.py --sources sacred_texts_archive/extracted --mode fast`
+3. **Create vector database** (if not using pre-built): `python data/ingest.py --sources sacred_texts_archive/extracted --mode fast`
 4. **Verify vector store**: Should have 200K+ documents in `vector_store/chroma/`
 
 ### Additional Requirements:

@@ -8,8 +8,8 @@ To create a new mode, you need to:
 
 1. Create a new Python file in `app/modes/`
 2. Implement a class that extends `BaseMode`
-3. Add configuration to `app/modes/config.py`
-4. Register the mode in the entry points
+3. Add any configuration to `app/config.py` (environment-driven)
+4. Register the mode in `app/modes/registry.py`
 5. Test your mode
 
 ## Step-by-Step Guide
@@ -29,7 +29,6 @@ from typing import Generator, Dict, Any, List, Optional
 import ollama
 
 from app.modes.base import BaseMode
-from app.modes.config import YOUR_MODE_CONFIG  # You'll create this
 from app import config as agent_config
 
 
@@ -38,7 +37,7 @@ class YourMode(BaseMode):
     
     def __init__(self, llm_provider, vector_store):
         super().__init__(llm_provider, vector_store)
-        self.config = YOUR_MODE_CONFIG
+        self.config = agent_config
         
     def run(self, query: str, chat_history: Optional[List[Dict]] = None) -> Generator[Dict[str, Any], None, str]:
         """
@@ -94,19 +93,18 @@ Generate a thoughtful response."""
         return response
 ```
 
-### Step 2: Add Configuration
+### Step 2: Add Configuration (Optional)
 
-Add your mode's configuration to `app/modes/config.py`:
+If your mode needs custom settings, add them to `app/config.py`:
 
 ```python
-# Your Mode Configuration - ONLY settings, NO prompts or logic
-YOUR_MODE_CONFIG = {
-    "max_results": 5,
-    "temperature": 0.7,
-    "max_iterations": 3,
-    # Add any other SETTINGS your mode needs (no prompts!)
-}
+# Add to app/config.py
+YOUR_MODE_MAX_RESULTS = get_env_int("YOUR_MODE_MAX_RESULTS", 5)
+YOUR_MODE_TEMPERATURE = get_env_float("YOUR_MODE_TEMPERATURE", 0.7)
+YOUR_MODE_MAX_ITERATIONS = get_env_int("YOUR_MODE_MAX_ITERATIONS", 3)
 ```
+
+Then use them in your mode: `agent_config.YOUR_MODE_MAX_RESULTS`
 
 ### Step 3: Register Your Mode
 
@@ -358,7 +356,7 @@ For modes that need to maintain complex state across multiple steps:
 class YourMode(BaseMode):
     def __init__(self, llm_provider, vector_store):
         super().__init__(llm_provider, vector_store)
-        self.config = YOUR_MODE_CONFIG
+        self.config = agent_config
         self.state = {}  # Mode-specific state
     
     def run(self, query: str, chat_history: Optional[List[Dict]] = None) -> Generator[Dict[str, Any], None, str]:
