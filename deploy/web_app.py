@@ -25,6 +25,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.providers import create_provider
 from app.modes.registry import MODES, get_mode, list_modes
 from app.agent import config as agent_config
+from app.core.vector_store import ChromaVectorStore
 
 
 class QueryRequest(BaseModel):
@@ -140,9 +141,9 @@ async def query(request: QueryRequest):
             name=agent_config.COLLECTION_NAME,
             metadata={"hnsw:space": "cosine"}
         )
-        
+        store = ChromaVectorStore(collection)
         # Get mode and run query
-        mode = get_mode(request.mode, llm, collection)
+        mode = get_mode(request.mode, llm, store)
         generator = mode.run(request.text, request.chat_history)
         
         # Collect all updates
@@ -185,13 +186,13 @@ async def websocket_endpoint(websocket: WebSocket):
             name=agent_config.COLLECTION_NAME,
             metadata={"hnsw:space": "cosine"}
         )
-        
+        store = ChromaVectorStore(collection)
         # Get mode
         mode_name = data.get("mode", "deep_research")
         query_text = data.get("text", "")
         chat_history = data.get("chat_history")
         
-        mode = get_mode(mode_name, llm, collection)
+        mode = get_mode(mode_name, llm, store)
         
         # Run query and stream results
         generator = mode.run(query_text, chat_history)

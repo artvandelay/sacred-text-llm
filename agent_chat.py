@@ -21,6 +21,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 
 from app.providers import create_provider
+from app.core.vector_store import ChromaVectorStore
 from app.modes.registry import MODES, get_mode, list_modes
 from app.agent import config as agent_config
 
@@ -60,7 +61,8 @@ def run_query(mode_name: str, query: str, show_progress: bool = True):
             name=agent_config.COLLECTION_NAME, 
             metadata={"hnsw:space": "cosine"}
         )
-        mode = get_mode(mode_name, llm, collection)
+        store = ChromaVectorStore(collection)
+        mode = get_mode(mode_name, llm, store)
     except ValueError as e:
         logging.error("Mode selection error: %s", e)
         console.print(f"[red]{e}[/red]")

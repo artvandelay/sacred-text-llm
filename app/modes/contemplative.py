@@ -8,6 +8,7 @@ from typing import Generator, Dict, Any, List, Optional
 import ollama
 
 from app.modes.base import BaseMode
+from app.core.vector_store import VectorStore, ChromaVectorStore
 from app.modes.config import CONTEMPLATIVE_CONFIG
 from app.agent import config as agent_config
 
@@ -18,6 +19,10 @@ class ContemplativeMode(BaseMode):
     def __init__(self, llm_provider, vector_store):
         super().__init__(llm_provider, vector_store)
         self.config = CONTEMPLATIVE_CONFIG
+        if hasattr(vector_store, "query"):
+            self.store: VectorStore = ChromaVectorStore(vector_store)
+        else:
+            self.store = vector_store
         
     def run(self, query: str, chat_history: Optional[List[Dict]] = None) -> Generator[Dict[str, Any], None, str]:
         """
@@ -33,14 +38,9 @@ class ContemplativeMode(BaseMode):
             q_embed = ollama.embeddings(model=agent_config.EMBEDDING_MODEL, prompt=query)["embedding"]
             
             # Search the collection
-            results = self.db.query(
-                query_embeddings=[q_embed], 
-                n_results=self.config["max_results"], 
-                include=["documents", "metadatas", "distances"]
-            )
-            
-            docs = results.get("documents", [[]])[0]
-            metas = results.get("metadatas", [[]])[0]
+            sr = self.store.query_embeddings([q_embed], k=self.config["max_results"])[0]
+            docs = sr.documents
+            metas = sr.metadatas
             
             if not docs:
                 yield {"type": "error", "content": "No relevant passages found"}
