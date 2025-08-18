@@ -169,8 +169,8 @@ class DeepResearchMode(BaseMode):
                     yield {"type": "research_complete", "reason": "Sufficient evidence gathered"}
                     break
                 
-                # Check evidence limits
-                if len(state.all_evidence_chunks) >= self.config.get("max_total_evidence_chunks", 15):
+                # Check evidence limits  
+                if len(state.all_evidence_chunks) >= 15:  # Reasonable limit for evidence
                     yield {"type": "evidence_limit", "chunks": len(state.all_evidence_chunks)}
                     break
             
@@ -257,7 +257,7 @@ Original question: {state.original_question}
 
 {context}
 
-Current iteration: {len(state.iterations) + 1} of {self.config['max_iterations']}
+Current iteration: {len(state.iterations) + 1} of {agent_config.MAX_ITERATIONS_PER_QUERY}
 Evidence collected so far: {len(state.all_evidence_chunks)} passages
 
 Generate a search strategy that:
