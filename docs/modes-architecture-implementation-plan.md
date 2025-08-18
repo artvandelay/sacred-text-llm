@@ -128,7 +128,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from app.modes.base import BaseMode
 from app.modes.config import DEEP_RESEARCH_CONFIG
-from app.agent.state import AgentState, AgentIteration  # Reuse existing state management
+from app.core.state import AgentState, AgentIteration  # Reuse existing state management
 
 class DeepResearchMode(BaseMode):
     """The original deep research agent as a mode."""
@@ -622,7 +622,7 @@ Test script to validate the modes architecture.
 import sys
 from app.modes.deep_research import DeepResearchMode
 from app.modes.contemplative import ContemplativeMode
-from app.providers import get_provider
+from app.core.providers import get_provider
 # Initialize your own dependencies as needed
 
 def test_mode(mode_class, query: str):

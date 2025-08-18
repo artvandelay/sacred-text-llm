@@ -20,7 +20,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 
-from app.providers import create_provider
+from app.core.providers import create_provider
 from app.core.vector_store import ChromaVectorStore
 from app.modes.registry import MODES, get_mode, list_modes
 from app.agent import config as agent_config

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Protocol, List, Dict, Any
 
 from app.config import COLLECTION_NAME
-from app.agent.state import SearchResult
+from app.core.state import SearchResult
 
 
 class VectorStore(Protocol):

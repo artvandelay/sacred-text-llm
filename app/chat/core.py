@@ -18,7 +18,7 @@ from app.config import (
     EMBEDDING_MODEL, VECTOR_STORE_DIR, COLLECTION_NAME,
     LLM_PROVIDER, OLLAMA_CHAT_MODEL, OPENROUTER_CHAT_MODEL
 )
-from app.providers import create_provider
+from app.core.providers import create_provider
 
 
 console = Console()
