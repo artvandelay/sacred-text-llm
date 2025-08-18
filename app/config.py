@@ -63,6 +63,9 @@ EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
 VECTOR_STORE_DIR = os.getenv("VECTOR_STORE_DIR", "vector_store/chroma")
 COLLECTION_NAME = os.getenv("COLLECTION_NAME", "sacred_texts")
 
+# Privacy: Disable ChromaDB telemetry for fully local operation
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+
 # =============================================================================
 # AGENT BEHAVIOR
 # =============================================================================
