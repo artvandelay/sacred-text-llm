@@ -16,6 +16,7 @@ from app.modes.base import BaseMode
 from app.modes.config import DEEP_RESEARCH_CONFIG
 from app.agent import config as agent_config
 from app.agent.state import SearchResult, parse_json_response
+from app.core.vector_store import VectorStore, ChromaVectorStore
 import ollama
 
 
@@ -56,6 +57,11 @@ class DeepResearchMode(BaseMode):
     def __init__(self, llm_provider, vector_store):
         super().__init__(llm_provider, vector_store)
         self.config = DEEP_RESEARCH_CONFIG
+        # adapt collection to vector store interface if needed
+        if hasattr(vector_store, "query"):
+            self.store: VectorStore = ChromaVectorStore(vector_store)
+        else:
+            self.store = vector_store
         
     def run(self, query: str, chat_history: Optional[List[Dict]] = None) -> Generator[Dict[str, Any], None, str]:
         """
@@ -194,27 +200,15 @@ class DeepResearchMode(BaseMode):
             q_embed = ollama.embeddings(model=agent_config.EMBEDDING_MODEL, prompt=query)["embedding"]
             
             # Search the collection using manual embeddings
-            results = self.db.query(
-                query_embeddings=[q_embed],
-                n_results=k,
-                include=["documents", "metadatas", "distances"]
-            )
+            results = self.store.query_embeddings([q_embed], k=k)[0]
             
             chunks = []
-            if results and results.get('documents'):
-                for i, doc in enumerate(results['documents'][0]):
-                    chunk = {
-                        'text': doc,
-                        'source': results['metadatas'][0][i].get('source', 'unknown') if results.get('metadatas') else 'unknown',
-                        'distance': results['distances'][0][i] if results.get('distances') else 0
-                    }
-                    chunks.append(chunk)
-        
+            # Build SearchResult from adapter result
             return SearchResult(
-                query=query, 
-                documents=[c['text'] for c in chunks],
-                metadatas=[{'source': c.get('source', 'unknown')} for c in chunks],
-                distances=[c.get('distance', 0) for c in chunks]
+                query=query,
+                documents=results.documents,
+                metadatas=results.metadatas,
+                distances=results.distances,
             )
         except Exception as e:
             return SearchResult(query=query, documents=[], metadatas=[], distances=[])
