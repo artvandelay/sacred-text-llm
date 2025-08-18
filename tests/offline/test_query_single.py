@@ -26,6 +26,17 @@ class DummyClient:
         return DummyCollection()
 
 
+class DummyVectorStore:
+    def query_embeddings(self, query_embeddings, k=5):
+        from app.core.state import SearchResult
+        return [SearchResult(
+            query="test",
+            documents=["Some context passage about kindness."],
+            metadatas=[{"source_path": "dummy/source.txt"}],
+            distances=[0.01]
+        )]
+
+
 def test_query_single_offline(monkeypatch, capsys):
     # Import target after monkeypatching modules it relies on
     import ollama
@@ -40,10 +51,17 @@ def test_query_single_offline(monkeypatch, capsys):
     # Patch provider factory to avoid network
     import app.core.providers as providers
     monkeypatch.setattr(providers, "create_provider", lambda provider_name: DummyLLM())
+    
+    # Patch vector store to avoid database
+    import app.core.vector_store as vector_store
+    monkeypatch.setattr(vector_store, "get_vector_store", lambda: DummyVectorStore())
 
     # Execute query.main with argv
-    import importlib
-    from importlib import reload
+    import sys
+    import os
+    # Add scripts to path
+    scripts_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "scripts")
+    sys.path.insert(0, scripts_path)
     import query as query_module
 
     # Simulate CLI args

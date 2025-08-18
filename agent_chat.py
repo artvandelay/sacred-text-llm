@@ -15,13 +15,13 @@ import argparse
 import logging
 from typing import Dict, Any
 
-import chromadb
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 
 from app.core.providers import create_provider
-from app.core.vector_store import ChromaVectorStore
+from app.core.vector_store import get_vector_store
 from app.modes.registry import MODES, get_mode, list_modes
 from app import config as agent_config
 
@@ -53,15 +53,10 @@ def run_query(mode_name: str, query: str, show_progress: bool = True):
     """Run a single query through the specified mode."""
     # Initialize dependencies
     llm = create_provider(agent_config.LLM_PROVIDER)
-    db = chromadb.PersistentClient(path=agent_config.VECTOR_STORE_DIR)
+    store = get_vector_store()
     
     # Get mode instance
     try:
-        collection = db.get_or_create_collection(
-            name=agent_config.COLLECTION_NAME, 
-            metadata={"hnsw:space": "cosine"}
-        )
-        store = ChromaVectorStore(collection)
         mode = get_mode(mode_name, llm, store)
     except ValueError as e:
         logging.error("Mode selection error: %s", e)

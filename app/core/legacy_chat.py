@@ -7,7 +7,6 @@ from typing import List, Dict, Any, Optional
 import os
 import textwrap
 
-import chromadb
 import ollama
 from rich.console import Console
 from rich.panel import Panel
@@ -15,10 +14,10 @@ from rich.prompt import Prompt
 from rich.markdown import Markdown
 
 from app.config import (
-    EMBEDDING_MODEL, VECTOR_STORE_DIR, COLLECTION_NAME,
-    LLM_PROVIDER, OLLAMA_CHAT_MODEL, OPENROUTER_CHAT_MODEL
+    EMBEDDING_MODEL, LLM_PROVIDER, OLLAMA_CHAT_MODEL, OPENROUTER_CHAT_MODEL
 )
 from app.core.providers import create_provider
+from app.core.vector_store import get_vector_store
 
 
 console = Console()
@@ -27,22 +26,15 @@ console = Console()
 class SacredTextsChat:
     def __init__(self):
         self.console = console
-        self.client = None
-        self.collection = None
+        self.store = None
         self.chat_history: List[Dict[str, str]] = []
         self.llm_provider = create_provider(LLM_PROVIDER)
         self.chat_model = OLLAMA_CHAT_MODEL if LLM_PROVIDER == "ollama" else OPENROUTER_CHAT_MODEL
 
     def initialize(self) -> bool:
         try:
-            if not os.path.exists(VECTOR_STORE_DIR):
-                self.console.print("[red]Error: Vector store not found. Please run ingestion first.[/red]")
-                return False
-            self.client = chromadb.PersistentClient(path=VECTOR_STORE_DIR)
-            self.collection = self.client.get_or_create_collection(
-                name=COLLECTION_NAME, metadata={"hnsw:space": "cosine"}
-            )
-            count = self.collection.count()
+            self.store = get_vector_store()
+            count = self.store._collection.count()
             if count == 0:
                 self.console.print("[yellow]Warning: Vector store is empty. Ingestion may still be running.[/yellow]")
                 return False
@@ -55,12 +47,11 @@ class SacredTextsChat:
     def search_texts(self, question: str, k: int = 5) -> tuple[List[str], List[Dict[str, Any]]]:
         try:
             q_embed = ollama.embeddings(model=EMBEDDING_MODEL, prompt=question)["embedding"]
-            results = self.collection.query(
-                query_embeddings=[q_embed], n_results=k, include=["documents", "metadatas", "distances"]
-            )
-            docs = results.get("documents", [[]])[0]
-            metas = results.get("metadatas", [[]])[0]
-            return docs, metas
+            search_results = self.store.query_embeddings([q_embed], k=k)
+            if not search_results:
+                return [], []
+            result = search_results[0]
+            return result.documents, result.metadatas
         except Exception as e:
             self.console.print(f"[red]Search error: {e}[/red]")
             return [], []

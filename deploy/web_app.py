@@ -16,7 +16,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
-import chromadb
+
 import uvicorn
 
 # Add project root to path
@@ -25,7 +25,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.core.providers import create_provider
 from app.modes.registry import MODES, get_mode, list_modes
 from app import config as agent_config
-from app.core.vector_store import ChromaVectorStore
+from app.core.vector_store import get_vector_store
 
 
 class QueryRequest(BaseModel):
@@ -136,12 +136,7 @@ async def query(request: QueryRequest):
     try:
         # Initialize dependencies
         llm = create_provider(agent_config.LLM_PROVIDER)
-        db = chromadb.PersistentClient(path=agent_config.VECTOR_STORE_DIR)
-        collection = db.get_or_create_collection(
-            name=agent_config.COLLECTION_NAME,
-            metadata={"hnsw:space": "cosine"}
-        )
-        store = ChromaVectorStore(collection)
+        store = get_vector_store()
         # Get mode and run query
         mode = get_mode(request.mode, llm, store)
         generator = mode.run(request.text, request.chat_history)
@@ -181,12 +176,7 @@ async def websocket_endpoint(websocket: WebSocket):
         
         # Initialize dependencies
         llm = create_provider(agent_config.LLM_PROVIDER)
-        db = chromadb.PersistentClient(path=agent_config.VECTOR_STORE_DIR)
-        collection = db.get_or_create_collection(
-            name=agent_config.COLLECTION_NAME,
-            metadata={"hnsw:space": "cosine"}
-        )
-        store = ChromaVectorStore(collection)
+        store = get_vector_store()
         # Get mode
         mode_name = data.get("mode", "deep_research")
         query_text = data.get("text", "")

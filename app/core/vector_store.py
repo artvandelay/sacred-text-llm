@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import chromadb
 from typing import Protocol, List, Dict, Any
 
-from app.config import COLLECTION_NAME
+from app.config import COLLECTION_NAME, VECTOR_STORE_DIR
 from app.core.state import SearchResult
 
 
@@ -27,5 +28,15 @@ class ChromaVectorStore:
         # For now a single query per call
         sr = SearchResult(query="", documents=docs, metadatas=metas, distances=dists)
         return [sr]
+
+
+def get_vector_store() -> ChromaVectorStore:
+    """Get a standardized ChromaVectorStore instance."""
+    client = chromadb.PersistentClient(path=VECTOR_STORE_DIR)
+    collection = client.get_or_create_collection(
+        name=COLLECTION_NAME, 
+        metadata={"hnsw:space": "cosine"}
+    )
+    return ChromaVectorStore(collection)
 
 
