@@ -9,7 +9,6 @@ import ollama
 
 from app.modes.base import BaseMode
 from app.core.vector_store import VectorStore, ChromaVectorStore
-from app.modes.config import CONTEMPLATIVE_CONFIG
 from app import config as agent_config
 
 
@@ -18,7 +17,6 @@ class ContemplativeMode(BaseMode):
     
     def __init__(self, llm_provider, vector_store):
         super().__init__(llm_provider, vector_store)
-        self.config = CONTEMPLATIVE_CONFIG
         if hasattr(vector_store, "query"):
             self.store: VectorStore = ChromaVectorStore(vector_store)
         else:
@@ -37,8 +35,8 @@ class ContemplativeMode(BaseMode):
             # Get embedding for the query
             q_embed = ollama.embeddings(model=agent_config.EMBEDDING_MODEL, prompt=query)["embedding"]
             
-            # Search the collection
-            sr = self.store.query_embeddings([q_embed], k=self.config["max_results"])[0]
+            # Search the collection - only get 1 result for contemplation
+            sr = self.store.query_embeddings([q_embed], k=1)[0]
             docs = sr.documents
             metas = sr.metadatas
             

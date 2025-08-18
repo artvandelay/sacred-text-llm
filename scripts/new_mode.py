@@ -4,16 +4,16 @@ from pathlib import Path
 
 TEMPLATE = """
 from typing import Generator, Dict, Any, List, Optional
+import ollama
 
 from app.modes.base import BaseMode
 from app.core.vector_store import VectorStore, ChromaVectorStore
-from app.modes.config import {mode_upper}_CONFIG
+from app import config as agent_config
 
 
 class {mode_class}(BaseMode):
     def __init__(self, llm_provider, vector_store):
         super().__init__(llm_provider, vector_store)
-        self.config = {mode_upper}_CONFIG if '{mode_upper}_CONFIG' in globals() else {{}}
         if hasattr(vector_store, "query"):
             self.store: VectorStore = ChromaVectorStore(vector_store)
         else:
