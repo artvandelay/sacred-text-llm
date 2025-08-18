@@ -23,7 +23,7 @@ from rich.prompt import Prompt
 from app.core.providers import create_provider
 from app.core.vector_store import ChromaVectorStore
 from app.modes.registry import MODES, get_mode, list_modes
-from app.agent import config as agent_config
+from app import config as agent_config
 
 
 console = Console()

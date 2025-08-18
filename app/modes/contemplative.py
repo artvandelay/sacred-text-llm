@@ -10,7 +10,7 @@ import ollama
 from app.modes.base import BaseMode
 from app.core.vector_store import VectorStore, ChromaVectorStore
 from app.modes.config import CONTEMPLATIVE_CONFIG
-from app.agent import config as agent_config
+from app import config as agent_config
 
 
 class ContemplativeMode(BaseMode):

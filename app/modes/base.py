@@ -21,7 +21,7 @@ class BaseMode(ABC):
         Initialize the mode with required dependencies.
         
         Args:
-            llm_provider: The LLM provider instance (from app.providers)
+            llm_provider: The LLM provider instance (from app.core.providers)
             vector_store: The vector store instance (ChromaDB)
         """
         self.llm = llm_provider

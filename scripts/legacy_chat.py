@@ -3,7 +3,7 @@
 Thin wrapper to preserve `python chat.py` entrypoint after reorg.
 """
 
-from app.chat.cli import main
+from app.core.cli_chat import main
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 CLI entrypoint for Sacred Texts Chat
 """
 
-from app.chat.core import SacredTextsChat
+from app.core.legacy_chat import SacredTextsChat
 
 
 def main() -> None:

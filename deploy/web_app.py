@@ -24,7 +24,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.providers import create_provider
 from app.modes.registry import MODES, get_mode, list_modes
-from app.agent import config as agent_config
+from app import config as agent_config
 from app.core.vector_store import ChromaVectorStore
 
 

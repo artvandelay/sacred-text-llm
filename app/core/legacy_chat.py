@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Core chat implementation extracted from root chat.py
+Legacy chat implementation for backward compatibility.
 """
 
 from typing import List, Dict, Any, Optional

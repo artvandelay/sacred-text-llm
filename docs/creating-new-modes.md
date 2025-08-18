@@ -30,7 +30,7 @@ import ollama
 
 from app.modes.base import BaseMode
 from app.modes.config import YOUR_MODE_CONFIG  # You'll create this
-from app.agent import config as agent_config
+from app import config as agent_config
 
 
 class YourMode(BaseMode):
