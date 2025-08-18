@@ -12,6 +12,7 @@ Simple, minimal, focused.
 
 import sys
 import argparse
+import logging
 from typing import Dict, Any
 
 import chromadb
@@ -25,6 +26,7 @@ from app.agent import config as agent_config
 
 
 console = Console()
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 
 def display_update(update: Dict[str, Any]):
@@ -60,6 +62,7 @@ def run_query(mode_name: str, query: str, show_progress: bool = True):
         )
         mode = get_mode(mode_name, llm, collection)
     except ValueError as e:
+        logging.error("Mode selection error: %s", e)
         console.print(f"[red]{e}[/red]")
         return
     
@@ -88,6 +91,7 @@ def run_query(mode_name: str, query: str, show_progress: bool = True):
             response = "No response generated."
             
     except Exception as e:
+        logging.exception("Run query error")
         response = f"Error: {str(e)}"
     
     # Display response

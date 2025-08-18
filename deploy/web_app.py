@@ -9,6 +9,7 @@ import os
 import sys
 import asyncio
 import json
+import logging
 from typing import Optional, List, Dict, Any
 from contextlib import asynccontextmanager
 
@@ -48,6 +49,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Sacred Texts LLM", lifespan=lifespan)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -114,6 +116,17 @@ async def info():
         "modes": {name: {"description": info["description"]} for name, info in MODES.items()},
         "default_mode": "deep_research"
     }
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
+
+@app.get("/version")
+async def version():
+    # Simple version info; could be wired to git hash via env later
+    return {"version": "modes-architecture-initial"}
 
 
 @app.post("/query")
@@ -200,6 +213,7 @@ async def websocket_endpoint(websocket: WebSocket):
             })
             
     except Exception as e:
+        logging.exception("WebSocket error")
         await websocket.send_json({
             "type": "error",
             "content": str(e)

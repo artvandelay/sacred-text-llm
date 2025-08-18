@@ -79,3 +79,12 @@ chunks/
 data/vector_db/
 sacred-text-LLM.code-workspace
 vector_store
+
+# Deployment runtime artifacts
+.ngrok.pid
+.ngrok_url
+.web_server.pid
+webapp.pid
+chroma_db/
+chroma_db/**
+logs/

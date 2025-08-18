@@ -7,6 +7,7 @@ import os
 import re
 from typing import List, Dict
 
+import logging
 import ollama
 import openai
 
@@ -39,17 +40,13 @@ class OllamaProvider(LLMProvider):
     
     def generate_response(self, messages: List[Dict[str, str]], model: str) -> str:
         try:
-            # Call local Ollama
             response = ollama.chat(model=model, messages=messages)
             content = response["message"]["content"]
-            
-            # Clean up Qwen's thinking blocks (if any)
             content = re.sub(r"<think>[\s\S]*?</think>\n?", "", content)
-            
             return content.strip()
-            
         except Exception as e:
-            return f"Error with local Ollama: {e}"
+            logging.exception("OllamaProvider error")
+            raise
 
 
 class OpenRouterProvider(LLMProvider):
@@ -76,18 +73,16 @@ class OpenRouterProvider(LLMProvider):
     
     def generate_response(self, messages: List[Dict[str, str]], model: str) -> str:
         try:
-            # Call OpenRouter API
             response = self.client.chat.completions.create(
                 model=model,
                 messages=messages,
                 temperature=0.7,
-                max_tokens=8000  # Increased for comprehensive responses
+                max_tokens=8000,
             )
-            
             return response.choices[0].message.content
-            
-        except Exception as e:
-            return f"Error with OpenRouter: {e}"
+        except Exception:
+            logging.exception("OpenRouterProvider error")
+            raise
 
 
 def create_provider(provider_name: str) -> LLMProvider:
