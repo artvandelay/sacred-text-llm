@@ -1,5 +1,9 @@
-# Sacred Texts LLM Agent Configuration
-# Environment-based configuration with sensible defaults
+"""
+Deprecated: use app.config instead.
+
+This file remains temporarily to avoid breaking imports during the
+transition. Prefer importing settings from `app.config`.
+"""
 
 import os
 from typing import Optional
@@ -8,18 +12,12 @@ from pathlib import Path
 # Load .env file from root directory
 try:
     from dotenv import load_dotenv
-    # Get the root directory (2 levels up from this file)
     root_dir = Path(__file__).parent.parent.parent
     env_path = root_dir / ".env"
     if env_path.exists():
         load_dotenv(env_path)
-        print(f"✓ Loaded environment variables from {env_path}")
-    else:
-        print(f"ℹ️  No .env file found at {env_path}")
-except ImportError:
-    print("ℹ️  python-dotenv not installed. Install with: pip install python-dotenv")
-except Exception as e:
-    print(f"⚠️  Error loading .env file: {e}")
+except Exception:
+    pass
 
 def get_env_bool(key: str, default: bool = False) -> bool:
     """Get boolean from environment variable"""
