@@ -26,10 +26,15 @@ app/
 │   ├── core.py              # Legacy stub (will be removed)
 │   └── state.py             # Shared data structures
 ├── config.py                # Unified config import surface (use this)
-└── providers.py             # LLM providers
+├── core/
+│   ├── state.py             # Shared data structures (planned move)
+│   ├── vector_store.py      # VectorStore adapter(s)
+│   └── providers.py         # LLM providers (planned move)
+└── config.py                # Unified config import surface (use this)
 
-agent_chat.py                # Thin CLI dispatcher (129 lines)
-deploy/web_app.py            # Thin web dispatcher (246 lines)
+agent_chat.py                # Thin CLI dispatcher
+deploy/web_app.py            # Thin web dispatcher
+scripts/                     # Dev/legacy scripts (chat, query, new_mode)
 ```
 
 ## Key Improvements
