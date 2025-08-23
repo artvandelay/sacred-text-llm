@@ -6,6 +6,7 @@ This registry is imported by both CLI and web interfaces to avoid duplication.
 
 from app.modes.deep_research import DeepResearchMode
 from app.modes.contemplative import ContemplativeMode
+from app.modes.content_creator import ContentCreatorMode
 
 
 # Single registry of all available modes
@@ -19,6 +20,11 @@ MODES = {
         "class": ContemplativeMode,
         "description": "Reflective mode that offers a passage and thoughtful question",
         "aliases": ["contemplate", "reflect"]
+    },
+    "content_creator": {
+        "class": ContentCreatorMode,
+        "description": "Generates an engaging tweet with auto-critique",
+        "aliases": ["tweet", "social"]
     }
 }
 
