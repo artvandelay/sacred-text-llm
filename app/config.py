@@ -88,6 +88,22 @@ ENABLE_QUERY_REFORMULATION = get_env_bool("ENABLE_QUERY_REFORMULATION", True)
 DEFAULT_SEARCH_K = get_env_int("DEFAULT_SEARCH_K", 5)
 MAX_TOTAL_EVIDENCE_CHUNKS = get_env_int("MAX_TOTAL_EVIDENCE_CHUNKS", 15)
 
+# Content creator settings
+CONTENT_CREATOR_TARGET_SCORE = get_env_int("CONTENT_CREATOR_TARGET_SCORE", 9)
+CONTENT_CREATOR_MAX_PASSES = get_env_int("CONTENT_CREATOR_MAX_PASSES", 5)
+DEFAULT_TRADITIONS = [
+    "Bhagavad Gita",
+    "Bible",
+    "Quran",
+    "Tao Te Ching",
+    "Dhammapada",
+]
+_traditions = os.getenv("CONTENT_CREATOR_TRADITIONS")
+if _traditions:
+    CONTENT_CREATOR_TRADITIONS = [t.strip() for t in _traditions.split(",") if t.strip()]
+else:
+    CONTENT_CREATOR_TRADITIONS = DEFAULT_TRADITIONS
+
 # =============================================================================
 # UI & PROGRESS
 # =============================================================================
