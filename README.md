@@ -8,7 +8,11 @@ Chat with sacred texts using advanced AI - query the Bhagavad Gita, Bible, Quran
 
 *Texts courtesy of [sacred-texts.com](https://sacred-texts.com/) - "the largest freely available archive of online books about religion, mythology, folklore and the esoteric on the Internet"*
 
+
+
 ## 🚀 Quick Start
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/artvandelay/sacred-text-llm)
 
 ### Get Running in 15 Minutes
 
